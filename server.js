@@ -136,5 +136,5 @@ app.post('/api/job-orders/:id/photos', upload.array('photos', 20), async (req, r
   res.json({ success: true });
 });
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log('🚀 EECO Job Order System กำลังทำงานที่ port ' + PORT));
