@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ระบบใบสั่งงาน EECO - หน้าเจ้าหน้าที่</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f2f4f7; margin: 0; }
+  header { background: #0b5394; color: #fff; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; }
+  header h2 { margin: 0; }
+  header button { background: #fff; color: #0b5394; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+  .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
+  .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+  .tab-btn { padding: 10px 20px; border: none; background: #ddd; border-radius: 6px 6px 0 0; cursor: pointer; }
+  .tab-btn.active { background: #0b5394; color: #fff; }
+  .panel { background: #fff; padding: 20px; border-radius: 0 8px 8px 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); display: none; }
+  .panel.active { display: block; }
+  label { display: block; margin-top: 10px; font-weight: 600; font-size: 14px; }
+  input, select, textarea { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 5px; }
+  .row { display: flex; gap: 15px; flex-wrap: wrap; }
+  .row > div { flex: 1; min-width: 200px; }
+  button.primary { background: #0b5394; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-top: 15px; }
+  button.secondary { background: #27ae60; color: #fff; border: none; padding: 8px 14px; border-radius: 5px; cursor: pointer; }
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+  th, td { border: 1px solid #ddd; padding: 8px; font-size: 14px; text-align: left; }
+  th { background: #f0f2f5; }
+  .status { padding: 3px 10px; border-radius: 12px; font-size: 12px; color: #fff; }
+  .status.issued { background: #f39c12; }
+  .status.signed { background: #27ae60; }
+  .item-row { display: flex; gap: 10px; margin-top: 8px; align-items: center; }
+  .item-row input { flex: 1; }
+  .item-row button { background: #e74c3c; color: #fff; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; }
+  .link-box { background: #f0f8ff; padding: 10px; border-radius: 6px; margin-top: 10px; word-break: break-all; }
+</style>
+</head>
+<body>
+
+<header>
+  <h2>📋 ระบบใบสั่งงาน EECO</h2>
+  <div>
+    <span id="userName" style="margin-right:15px;"></span>
+    <button onclick="logout()">ออกจากระบบ</button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('contracts')">📑 สัญญา</button>
+    <button class="tab-btn" onclick="showTab('joborders')">📝 ใบสั่งงาน</button>
+    <button class="tab-btn" onclick="showTab('createjo')">➕ สร้างใบสั่งงานใหม่</button>
+  </div>
+
+  <!-- TAB 1: CONTRACTS -->
+  <div id="tab-contracts" class="panel active">
+    <h3>สร้างสัญญาใหม่</h3>
+    <div class="row">
+      <div><label>เลขที่สัญญา</label><input id="c_no" placeholder="เช่น EECO-001/2569"></div>
+      <div><label>ชื่อผู้รับจ้าง</label><input id="c_name" placeholder="บริษัท/ผู้รับจ้าง"></div>
+    </div>
+    <div class="row">
+      <div><label>พื้นที่รวมตามสัญญา (ตร.ม.)</label><input id="c_area" type="number"></div>
+      <div><label>มูลค่ารวมสัญญา (บาท)</label><input id="c_value" type="number"></div>
+    </div>
+    <div class="row">
+      <div><label>Email ผู้รับจ้าง (แจ้งเตือน)</label><input id="c_email" type="email"></div>
+      <div><label>LINE User ID ผู้รับจ้าง (แจ้งเตือน)</label><input id="c_line"></div>
+    </div>
+    <button class="primary" onclick="createContract()">💾 บันทึกสัญญา</button>
+
+    <h3 style="margin-top:30px;">รายการสัญญาทั้งหมด</h3>
+    <table>
+      <thead><tr><th>เลขที่สัญญา</th><th>ผู้รับจ้าง</th><th>พื้นที่รวม</th><th>มูลค่ารวม</th></tr></thead>
+      <tbody id="contractTable"></tbody>
+    </table>
+  </div>
+
+  <!-- TAB 2: JOB ORDERS LIST -->
+  <div id="tab-joborders" class="panel">
+    <h3>รายการใบสั่งงานทั้งหมด</h3>
+    <table>
+      <thead><tr><th>เลขที่ใบสั่งงาน</th><th>วันที่ออก</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+      <tbody id="jobOrderTable"></tbody>
+    </table>
+  </div>
+
+  <!-- TAB 3: CREATE JOB ORDER -->
+  <div id="tab-createjo" class="panel">
+    <h3>สร้างใบสั่งงานใหม่</h3>
+    <label>เลือกสัญญา</label>
+    <select id="jo_contract"></select>
+
+    <div class="row">
+      <div><label>เลขที่ใบสั่งงาน</label><input id="jo_no" placeholder="เช่น JO-001/2569"></div>
+      <div><label>วันที่ออกใบสั่งงาน</label><input id="jo_issued" type="date"></div>
+    </div>
+    <div class="row">
+      <div><label>วันที่ส่งมอบพื้นที่</label><input id="jo_delivery" type="date"></div>
+      <div><label>วันที่สำรวจ</label><input id="jo_survey" type="date"></div>
+    </div>
+    <div class="row">
+      <div><label>วันที่เริ่มงาน</label><input id="jo_start" type="date"></div>
+      <div><label>ระยะเวลาดำเนินงาน (วัน)</label><input id="jo_duration" type="number"></div>
+    </div>
+    <div class="row">
+      <div><label>ผู้จัดทำ</label><input id="jo_prepared"></div>
+      <div><label>หน่วยงาน/แผนก</label><input id="jo_dept"></div>
+    </div>
+
+    <label>รายละเอียดงาน</label>
+    <textarea id="jo_detail" rows="3"></textarea>
+
+    <div class="row">
+      <div><label>ผู้ปฏิบัติงาน</label><input id="jo_workers"></div>
+      <div><label>เครื่องมือ/อุปกรณ์</label><input id="jo_equipment"></div>
+    </div>
+
+    <label>ข้อจำกัดพื้นที่</label>
+    <textarea id="jo_restrict" rows="2"></textarea>
+    <label>เงื่อนไขความปลอดภัย</label>
+    <textarea id="jo_safety" rows="2"></textarea>
+    <label>การจัดการของเสีย</label>
+    <textarea id="jo_waste" rows="2"></textarea>
+
+    <h4 style="margin-top:20px;">รายการงาน / คำนวณพื้นที่</h4>
+    <div id="itemsContainer"></div>
+    <button type="button" class="secondary" onclick="addItemRow()">+ เพิ่มรายการงาน</button>
+
+    <p><b>พื้นที่รวมใบสั่งงานนี้:</b> <span id="totalAreaDisplay">0</span> ตร.ม.</p>
+
+    <button class="primary" onclick="createJobOrder()">🚀 สร้างและส่งใบสั่งงาน</button>
+    <div id="joResultLink"></div>
+  </div>
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+if (!token) window.location.href = '/login.html';
+document.getElementById('userName').innerText = '👤 ' + (localStorage.getItem('name') || '');
+
+function logout() {
+  localStorage.clear();
+  window.location.href = '/login.html';
+}
+
+function showTab(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'joborders') loadJobOrders();
+  if (name === 'createjo') loadContractsForSelect();
+}
+
+async function apiFetch(url, options = {}) {
+  options.headers = { ...(options.headers||{}), 'Authorization': 'Bearer ' + token };
+  const res = await fetch(url, options);
+  if (res.status === 401) { logout(); return; }
+  return res;
+}
+
+// ---------- CONTRACTS ----------
+async function createContract() {
+  const body = {
+    contract_no: document.getElementById('c_no').value,
+    contractor_name: document.getElementById('c_name').value,
+    total_area: document.getElementById('c_area').value,
+    total_value: document.getElementById('c_value').value,
+    contractor_email: document.getElementById('c_email').value,
+    contractor_line_id: document.getElementById('c_line').value
+  };
+  const res = await apiFetch('/api/contracts', {
+    method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body)
+  });
+  if (res.ok) { alert('✅ บันทึกสัญญาสำเร็จ'); loadContracts(); document.querySelectorAll('#tab-contracts input').forEach(i=>i.value=''); }
+  else alert('❌ เกิดข้อผิดพลาด');
+}
+
+async function loadContracts() {
+  const res = await apiFetch('/api/contracts');
+  const data = await res.json();
+  document.getElementById('contractTable').innerHTML = data.map(c => `
+    <tr><td>${c.contract_no}</td><td>${c.contractor_name}</td><td>${c.total_area}</td><td>${c.total_value}</td></tr>
+  `).join('');
+}
+
+async function loadContractsForSelect() {
+  const res = await apiFetch('/api/contracts');
+  const data = await res.json();
+  document.getElementById('jo_contract').innerHTML = data.map(c =>
+    `<option value="${c.id}">${c.contract_no} - ${c.contractor_name}</option>`).join('');
+}
+
+// ---------- JOB ORDER ITEMS ----------
+let itemCount = 0;
+function addItemRow() {
+  itemCount++;
+  const div = document.createElement('div');
+  div.className = 'item-row';
+  div.id = 'item-' + itemCount;
+  div.innerHTML = `
+    <input placeholder="ประเภทงาน" class="item-type">
+    <input placeholder="สะสมก่อนหน้า" type="number" class="item-prev" value="0" oninput="calcTotal()">
+    <input placeholder="พื้นที่ครั้งนี้" type="number" class="item-area" value="0" oninput="calcTotal()">
+    <input placeholder="ราคาต่อหน่วย" type="number" class="item-price" value="0">
+    <button onclick="document.getElementById('item-${itemCount}').remove(); calcTotal();">ลบ</button>
+  `;
+  document.getElementById('itemsContainer').appendChild(div);
+}
+
+function calcTotal() {
+  let total = 0;
+  document.querySelectorAll('.item-area').forEach(el => total += Number(el.value || 0));
+  document.getElementById('totalAreaDisplay').innerText = total.toFixed(2);
+}
+
+// ---------- CREATE JOB ORDER ----------
+async function createJobOrder() {
+  const items = [];
+  document.querySelectorAll('.item-row').forEach(row => {
+    items.push({
+      work_type: row.querySelector('.item-type').value,
+      prev_cumulative: row.querySelector('.item-prev').value,
+      area_this_order: row.querySelector('.item-area').value,
+      unit_price: row.querySelector('.item-price').value
+    });
+  });
+
+  const body = {
+    contract_id: document.getElementById('jo_contract').value,
+    job_order_no: document.getElementById('jo_no').value,
+    issued_date: document.getElementById('jo_issued').value,
+    delivery_date: document.getElementById('jo_delivery').value,
+    survey_date: document.getElementById('jo_survey').value,
+    start_date: document.getElementById('jo_start').value,
+    duration_days: document.getElementById('jo_duration').value,
+    prepared_by: document.getElementById('jo_prepared').value,
+    department: document.getElementById('jo_dept').value,
+    work_detail: document.getElementById('jo_detail').value,
+    workers: document.getElementById('jo_workers').value,
+    equipment: document.getElementById('jo_equipment').value,
+    area_restriction: document.getElementById('jo_restrict').value,
+    safety_condition: document.getElementById('jo_safety').value,
+    waste_management: document.getElementById('jo_waste').value,
+    total_area: document.getElementById('totalAreaDisplay').innerText,
+    items
+  };
+
+  const res = await apiFetch('/api/job-orders', {
+    method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  if (res.ok) {
+    const fullLink = window.location.origin + data.contractor_link;
+    document.getElementById('joResultLink').innerHTML = `
+      <div class="link-box">
+        ✅ สร้างใบสั่งงานสำเร็จ! ลิงก์สำหรับผู้รับจ้าง:<br>
+        <a href="${fullLink}" target="_blank">${fullLink}</a>
+      </div>`;
+  } else {
+    alert('❌ เกิดข้อผิดพลาดในการสร้างใบสั่งงาน');
+  }
+}
+
+// ---------- JOB ORDERS LIST ----------
+async function loadJobOrders() {
+  const res = await apiFetch('/api/job-orders');
+  const data = await res.json();
+  document.getElementById('jobOrderTable').innerHTML = data.map(jo => `
+    <tr>
+      <td>${jo.job_order_no}</td>
+      <td>${jo.issued_date || '-'}</td>
+      <td><span class="status ${jo.contractor_signature ? 'signed' : 'issued'}">${jo.contractor_signature ? 'ลงนามแล้ว' : 'รอลงนาม'}</span></td>
+      <td><a href="/contractor.html?token=${jo.access_token}" target="_blank">🔗 เปิดดู</a></td>
+    </tr>
+  `).join('');
+}
+
+// เริ่มต้นโหลดข้อมูล
+loadContracts();
+addItemRow();
+</script>
+</body>
+</html>

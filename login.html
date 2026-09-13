@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>เข้าสู่ระบบ - EECO Job Order</title>
+<style>
+  body { font-family: sans-serif; background: #f2f4f7; display: flex; height: 100vh; align-items: center; justify-content: center; margin:0; }
+  .box { background: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 320px; }
+  h2 { color: #0b5394; text-align: center; }
+  input { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
+  button { width: 100%; padding: 10px; background: #0b5394; color: #fff; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+  #err { color: red; text-align: center; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="box">
+  <h2>ระบบใบสั่งงาน EECO</h2>
+  <input id="username" placeholder="Username" value="admin">
+  <input id="password" type="password" placeholder="Password" value="admin123">
+  <button onclick="login()">เข้าสู่ระบบ</button>
+  <p id="err"></p>
+</div>
+<script>
+async function login() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  const res = await fetch('/api/login', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ username, password })
+  });
+  const data = await res.json();
+  if (res.ok) {
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('name', data.name);
+    window.location.href = '/index.html';
+  } else {
+    document.getElementById('err').innerText = data.error;
+  }
+}
+</script>
+</body>
+</html>

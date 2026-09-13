@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>ใบสั่งงาน - ผู้รับจ้าง</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        .container { max-width: 800px; margin: auto; border: 1px solid #ccc; padding: 20px; }
+        .field { margin-bottom: 10px; }
+        label { font-weight: bold; }
+        button { background: #27ae60; color: white; border: none; padding: 10px 20px; cursor: pointer; margin-top: 20px; }
+    </style>
+</head>
+<body>
+<div class="container" id="content">
+    <h3>กำลังโหลดข้อมูลใบสั่งงาน...</h3>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    let currentOrderId = null;
+
+    async function loadJobOrder() {
+        const res = await fetch(`/api/contractor-view/${token}`);
+        if (!res.ok) { document.getElementById('content').innerHTML = '❌ ไม่พบข้อมูลใบสั่งงาน'; return; }
+        const jo = await res.json();
+        
+        currentOrderId = jo.id; 
+        
+        document.getElementById('content').innerHTML = `
+            <h2>ใบสั่งงานเลขที่: ${jo.job_order_no}</h2>
+            <div class="field"><label>รายละเอียด:</label> ${jo.work_detail}</div>
+            <div class="field"><label>พื้นที่รวม:</label> ${jo.total_area} ตร.ม.</div>
+            <hr>
+            ${jo.contractor_signature ? `✅ ลงนามแล้วโดย: ${jo.contractor_name}` : 
+              `<button onclick="signJobOrder()">✍️ ลงนามรับทราบใบสั่งงาน</button>`}
+        `;
+    }
+
+    async function signJobOrder() {
+        const name = prompt("กรุณาระบุชื่อผู้ลงนาม:");
+        if (!name) return;
+        
+        const res = await fetch(`/api/job-orders/${currentOrderId}/sign`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ 
+                name: name, 
+                signature: 'Signed', 
+                role: 'contractor' 
+            })
+        });
+        
+        if (res.ok) { 
+            alert('✅ ลงนามสำเร็จ'); 
+            location.reload(); 
+        } else { 
+            alert('❌ เกิดข้อผิดพลาดในการลงนาม'); 
+        }
+    }
+
+    loadJobOrder();
+</script>
+</body>
+</html>
