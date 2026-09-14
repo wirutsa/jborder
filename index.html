@@ -123,29 +123,58 @@
 
     <h4 style="margin-top:20px;">รายการงาน / คำนวณพื้นที่</h4>
     <div id="work-items-container">
-  <div class="work-item" style="display:flex; gap:8px; align-items:end; margin-bottom:10px;">
+  <div class="work-item" style="display:flex; gap:8px; align-items:end; margin-bottom:10px; flex-wrap:wrap;">
     <div>
       <label style="font-size:12px; color:#666;">ประเภทงาน</label>
-      <input type="text" class="work-type" placeholder="เช่น ตัดหญ้า">
+      <select class="work-type" style="padding:8px; border:1px solid #ccc; border-radius:4px;">
+        <option value="">-- เลือกประเภทงาน --</option>
+        <option value="งานเบา">งานเบา</option>
+        <option value="งานกลาง">งานกลาง</option>
+        <option value="งานหนัก">งานหนัก</option>
+      </select>
     </div>
     <div>
       <label style="font-size:12px; color:#666;">ไร่</label>
-      <input type="number" class="area-rai" value="0" min="0" onchange="calcArea(this)">
+      <input type="number" class="area-rai" value="0" min="0" style="width:80px;" onchange="calcArea(this)">
     </div>
     <div>
       <label style="font-size:12px; color:#666;">งาน</label>
-      <input type="number" class="area-ngan" value="0" min="0" onchange="calcArea(this)">
+      <input type="number" class="area-ngan" value="0" min="0" style="width:80px;" onchange="calcArea(this)">
     </div>
     <div>
       <label style="font-size:12px; color:#666;">ตารางวา</label>
-      <input type="number" class="area-wah" value="0" min="0" onchange="calcArea(this)">
+      <input type="number" class="area-wah" value="0" min="0" style="width:90px;" onchange="calcArea(this)">
     </div>
     <div>
       <label style="font-size:12px; color:#666;">รวม (ตร.วา)</label>
-      <input type="number" class="area-total" value="0" readonly style="background:#f0f0f0;">
+      <input type="number" class="area-total" value="0" readonly style="width:100px; background:#f0f0f0;">
     </div>
-    <button type="button" class="btn-delete" style="background:#dc3545; color:white; border:none; padding:8px 12px; border-radius:4px;" onclick="removeRow(this)">ลบ</button>
+    <div>
+      <label style="font-size:12px; color:#666;">รวม (ตร.ม.)</label>
+      <input type="number" class="area-sqm" value="0" readonly style="width:100px; background:#f0f0f0;">
+    </div>
+    <div>
+      <label style="font-size:12px; color:#666;">ราคา/ตร.ม.</label>
+      <input type="number" class="unit-price" value="0" min="0" step="0.01" style="width:100px;" onchange="calcArea(this)">
+    </div>
+    <div>
+      <label style="font-size:12px; color:#666;">เป็นเงิน (บาท)</label>
+      <input type="number" class="row-amount" value="0" readonly style="width:110px; background:#fff3cd;">
+    </div>
+    <button type="button" style="background:#dc3545; color:white; border:none; padding:8px 12px; border-radius:4px;" onclick="removeRow(this)">ลบ</button>
   </div>
+</div>
+
+<button type="button" onclick="addWorkRow()" style="background:#28a745; color:#fff; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; margin-top:5px;">+ เพิ่มรายการงาน</button>
+
+<div style="margin-top:15px; padding:12px; background:#e8f4fd; border-radius:6px; line-height:1.9; margin-bottom:15px;">
+  <strong>สรุปพื้นที่รวมใบสั่งงานนี้:</strong><br>
+  <span id="grand-total-rngw" style="color:#0b5394; font-weight:bold;">0 ไร่ 0 งาน 0 ตารางวา</span><br>
+  รวม: <span id="grand-total-area" style="font-weight:bold;">0</span> ตารางวา
+  &nbsp;|&nbsp;
+  คิดเป็น: <span id="grand-total-sqm" style="font-weight:bold; color:#b8860b;">0</span> ตารางเมตร<br>
+  <strong style="color:#c0392b;">รวมเป็นเงินทั้งสิ้น: <span id="grand-total-price">0.00</span> บาท</strong>
+</div>
 </div>
 
 <button type="button" onclick="addWorkRow()" style="background:#28a745; color:#fff; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; margin-top:5px;">+ เพิ่มรายการงาน</button>
@@ -166,7 +195,6 @@
 const token = localStorage.getItem('token');
 if (!token) window.location.href = '/login.html';
 document.getElementById('userName').innerText = '👤 ' + (localStorage.getItem('name') || '');
-// === เริ่มวางโค้ดที่คัดลอกมาตรงนี้ ===
 
 function normalizeArea(rai, ngan, wah) {
 
@@ -186,62 +214,53 @@ function normalizeArea(rai, ngan, wah) {
 
 
 function calcArea(el) {
-
   const row = el.closest('.work-item');
-
   const raiInput = row.querySelector('.area-rai');
-
   const nganInput = row.querySelector('.area-ngan');
-
   const wahInput = row.querySelector('.area-wah');
 
-
   const rai = parseFloat(raiInput.value) || 0;
-
   const ngan = parseFloat(nganInput.value) || 0;
-
   const wah = parseFloat(wahInput.value) || 0;
 
-
+  // ทดหน่วยอัตโนมัติ
   const result = normalizeArea(rai, ngan, wah);
-
-
   raiInput.value = result.rai;
-
   nganInput.value = result.ngan;
-
   wahInput.value = result.wah;
 
+  // รวมตารางวา
   row.querySelector('.area-total').value = result.totalWah;
 
+  // แปลงเป็นตารางเมตร (ตร.วา x 4)
+  const sqm = result.totalWah * 4;
+  row.querySelector('.area-sqm').value = sqm;
+
+  // คำนวณเป็นเงิน (ตร.ม. x ราคาต่อหน่วย)
+  const price = parseFloat(row.querySelector('.unit-price').value) || 0;
+  row.querySelector('.row-amount').value = (sqm * price).toFixed(2);
 
   updateGrandTotal();
-
 }
 
-
 function updateGrandTotal() {
-
-  const allTotals = document.querySelectorAll('.area-total');
-
   let grandTotalWah = 0;
+  let grandTotalPrice = 0;
 
-  allTotals.forEach(input => {
-
-    grandTotalWah += parseFloat(input.value) || 0;
-
+  document.querySelectorAll('.work-item').forEach(row => {
+    grandTotalWah += parseFloat(row.querySelector('.area-total').value) || 0;
+    grandTotalPrice += parseFloat(row.querySelector('.row-amount').value) || 0;
   });
 
+  const grandTotalSqm = grandTotalWah * 4;
 
   document.getElementById('grand-total-area').innerText = grandTotalWah.toLocaleString();
-
+  document.getElementById('grand-total-sqm').innerText = grandTotalSqm.toLocaleString();
+  document.getElementById('grand-total-price').innerText = grandTotalPrice.toLocaleString(undefined, {minimumFractionDigits: 2});
 
   const result = normalizeArea(0, 0, grandTotalWah);
-
-  document.getElementById('grand-total-rngw').innerText = 
-
+  document.getElementById('grand-total-rngw').innerText =
     `${result.rai} ไร่ ${result.ngan} งาน ${result.wah} ตารางวา`;
-
 }
 
 
@@ -313,29 +332,46 @@ function addWorkRow() {
   const container = document.getElementById('work-items-container');
   const row = document.createElement('div');
   row.className = 'work-item';
-  row.style.cssText = 'display:flex; gap:8px; align-items:end; margin-bottom:10px;';
+  row.style.cssText = 'display:flex; gap:8px; align-items:end; margin-bottom:10px; flex-wrap:wrap;';
   row.innerHTML = `
     <div>
       <label style="font-size:12px; color:#666;">ประเภทงาน</label>
-      <input type="text" class="work-type" placeholder="เช่น ตัดหญ้า">
+      <select class="work-type" style="padding:8px; border:1px solid #ccc; border-radius:4px;">
+        <option value="">-- เลือกประเภทงาน --</option>
+        <option value="งานเบา">งานเบา</option>
+        <option value="งานกลาง">งานกลาง</option>
+        <option value="งานหนัก">งานหนัก</option>
+      </select>
     </div>
     <div>
       <label style="font-size:12px; color:#666;">ไร่</label>
-      <input type="number" class="area-rai" value="0" min="0" onchange="calcArea(this)">
+      <input type="number" class="area-rai" value="0" min="0" style="width:80px;" onchange="calcArea(this)">
     </div>
     <div>
       <label style="font-size:12px; color:#666;">งาน</label>
-      <input type="number" class="area-ngan" value="0" min="0" onchange="calcArea(this)">
+      <input type="number" class="area-ngan" value="0" min="0" style="width:80px;" onchange="calcArea(this)">
     </div>
     <div>
       <label style="font-size:12px; color:#666;">ตารางวา</label>
-      <input type="number" class="area-wah" value="0" min="0" onchange="calcArea(this)">
+      <input type="number" class="area-wah" value="0" min="0" style="width:90px;" onchange="calcArea(this)">
     </div>
     <div>
       <label style="font-size:12px; color:#666;">รวม (ตร.วา)</label>
-      <input type="number" class="area-total" value="0" readonly style="background:#f0f0f0;">
+      <input type="number" class="area-total" value="0" readonly style="width:100px; background:#f0f0f0;">
     </div>
-    <button type="button" class="btn-delete" style="background:#dc3545; color:white; border:none; padding:8px 12px; border-radius:4px;" onclick="removeRow(this)">ลบ</button>
+    <div>
+      <label style="font-size:12px; color:#666;">รวม (ตร.ม.)</label>
+      <input type="number" class="area-sqm" value="0" readonly style="width:100px; background:#f0f0f0;">
+    </div>
+    <div>
+      <label style="font-size:12px; color:#666;">ราคา/ตร.ม.</label>
+      <input type="number" class="unit-price" value="0" min="0" step="0.01" style="width:100px;" onchange="calcArea(this)">
+    </div>
+    <div>
+      <label style="font-size:12px; color:#666;">เป็นเงิน (บาท)</label>
+      <input type="number" class="row-amount" value="0" readonly style="width:110px; background:#fff3cd;">
+    </div>
+    <button type="button" style="background:#dc3545; color:white; border:none; padding:8px 12px; border-radius:4px;" onclick="removeRow(this)">ลบ</button>
   `;
   container.appendChild(row);
   updateGrandTotal();
@@ -350,14 +386,18 @@ function calcTotal() {
 // ---------- CREATE JOB ORDER ----------
 async function createJobOrder() {
   const items = [];
-  document.querySelectorAll('.item-row').forEach(row => {
-    items.push({
-      work_type: row.querySelector('.item-type').value,
-      prev_cumulative: row.querySelector('.item-prev').value,
-      area_this_order: row.querySelector('.item-area').value,
-      unit_price: row.querySelector('.item-price').value
-    });
+  document.querySelectorAll('.work-item').forEach(row => {
+  items.push({
+    work_type: row.querySelector('.work-type').value,
+    rai: row.querySelector('.area-rai').value,
+    ngan: row.querySelector('.area-ngan').value,
+    wah: row.querySelector('.area-wah').value,
+    total_wah: row.querySelector('.area-total').value,
+    total_sqm: row.querySelector('.area-sqm').value,
+    unit_price: row.querySelector('.unit-price').value,
+    amount: row.querySelector('.row-amount').value
   });
+});
 
   const body = {
     contract_id: document.getElementById('jo_contract').value,
