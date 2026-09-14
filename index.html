@@ -122,10 +122,40 @@
     <textarea id="jo_waste" rows="2"></textarea>
 
     <h4 style="margin-top:20px;">รายการงาน / คำนวณพื้นที่</h4>
-    <div id="itemsContainer"></div>
-    <button type="button" class="secondary" onclick="addItemRow()">+ เพิ่มรายการงาน</button>
+    <div id="work-items-container">
+  <div class="work-item" style="display:flex; gap:8px; align-items:end; margin-bottom:10px;">
+    <div>
+      <label style="font-size:12px; color:#666;">ประเภทงาน</label>
+      <input type="text" class="work-type" placeholder="เช่น ตัดหญ้า">
+    </div>
+    <div>
+      <label style="font-size:12px; color:#666;">ไร่</label>
+      <input type="number" class="area-rai" value="0" min="0" onchange="calcArea(this)">
+    </div>
+    <div>
+      <label style="font-size:12px; color:#666;">งาน</label>
+      <input type="number" class="area-ngan" value="0" min="0" onchange="calcArea(this)">
+    </div>
+    <div>
+      <label style="font-size:12px; color:#666;">ตารางวา</label>
+      <input type="number" class="area-wah" value="0" min="0" onchange="calcArea(this)">
+    </div>
+    <div>
+      <label style="font-size:12px; color:#666;">รวม (ตร.วา)</label>
+      <input type="number" class="area-total" value="0" readonly style="background:#f0f0f0;">
+    </div>
+    <button type="button" class="btn-delete" style="background:#dc3545; color:white; border:none; padding:8px 12px; border-radius:4px;" onclick="removeRow(this)">ลบ</button>
+  </div>
+</div>
 
-    <p><b>พื้นที่รวมใบสั่งงานนี้:</b> <span id="totalAreaDisplay">0</span> ตร.ม.</p>
+<button type="button" onclick="addWorkRow()" style="background:#28a745; color:#fff; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; margin-top:5px;">+ เพิ่มรายการงาน</button>
+
+<div style="margin-top:15px; padding:12px; background:#e8f4fd; border-radius:6px; line-height:1.8; margin-bottom:15px;">
+  <strong>พื้นที่รวมงานที่สั่งทั้งหมด:</strong><br>
+  <span id="grand-total-rngw" style="color:#0b5394; font-weight:bold;">0 ไร่ 0 งาน 0 ตารางวา</span>
+  &nbsp;&nbsp;|&nbsp;&nbsp;
+  <span>รวม: <span id="grand-total-area" style="font-weight:bold;">0</span> ตารางวา</span>
+</div>
 
     <button class="primary" onclick="createJobOrder()">🚀 สร้างและส่งใบสั่งงาน</button>
     <div id="joResultLink"></div>
@@ -279,19 +309,36 @@ async function loadContractsForSelect() {
 
 // ---------- JOB ORDER ITEMS ----------
 let itemCount = 0;
-function addItemRow() {
-  itemCount++;
-  const div = document.createElement('div');
-  div.className = 'item-row';
-  div.id = 'item-' + itemCount;
-  div.innerHTML = `
-    <input placeholder="ประเภทงาน" class="item-type">
-    <input placeholder="สะสมก่อนหน้า" type="number" class="item-prev" value="0" oninput="calcTotal()">
-    <input placeholder="พื้นที่ครั้งนี้" type="number" class="item-area" value="0" oninput="calcTotal()">
-    <input placeholder="ราคาต่อหน่วย" type="number" class="item-price" value="0">
-    <button onclick="document.getElementById('item-${itemCount}').remove(); calcTotal();">ลบ</button>
+function addWorkRow() {
+  const container = document.getElementById('work-items-container');
+  const row = document.createElement('div');
+  row.className = 'work-item';
+  row.style.cssText = 'display:flex; gap:8px; align-items:end; margin-bottom:10px;';
+  row.innerHTML = `
+    <div>
+      <label style="font-size:12px; color:#666;">ประเภทงาน</label>
+      <input type="text" class="work-type" placeholder="เช่น ตัดหญ้า">
+    </div>
+    <div>
+      <label style="font-size:12px; color:#666;">ไร่</label>
+      <input type="number" class="area-rai" value="0" min="0" onchange="calcArea(this)">
+    </div>
+    <div>
+      <label style="font-size:12px; color:#666;">งาน</label>
+      <input type="number" class="area-ngan" value="0" min="0" onchange="calcArea(this)">
+    </div>
+    <div>
+      <label style="font-size:12px; color:#666;">ตารางวา</label>
+      <input type="number" class="area-wah" value="0" min="0" onchange="calcArea(this)">
+    </div>
+    <div>
+      <label style="font-size:12px; color:#666;">รวม (ตร.วา)</label>
+      <input type="number" class="area-total" value="0" readonly style="background:#f0f0f0;">
+    </div>
+    <button type="button" class="btn-delete" style="background:#dc3545; color:white; border:none; padding:8px 12px; border-radius:4px;" onclick="removeRow(this)">ลบ</button>
   `;
-  document.getElementById('itemsContainer').appendChild(div);
+  container.appendChild(row);
+  updateGrandTotal();
 }
 
 function calcTotal() {
