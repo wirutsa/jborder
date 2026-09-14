@@ -136,7 +136,94 @@
 const token = localStorage.getItem('token');
 if (!token) window.location.href = '/login.html';
 document.getElementById('userName').innerText = '👤 ' + (localStorage.getItem('name') || '');
+// === เริ่มวางโค้ดที่คัดลอกมาตรงนี้ ===
 
+function normalizeArea(rai, ngan, wah) {
+
+  const totalWah = (rai * 400) + (ngan * 100) + wah;
+
+  const newRai = Math.floor(totalWah / 400);
+
+  const remainder = totalWah % 400;
+
+  const newNgan = Math.floor(remainder / 100);
+
+  const newWah = remainder % 100;
+
+  return { rai: newRai, ngan: newNgan, wah: newWah, totalWah: totalWah };
+
+}
+
+
+function calcArea(el) {
+
+  const row = el.closest('.work-item');
+
+  const raiInput = row.querySelector('.area-rai');
+
+  const nganInput = row.querySelector('.area-ngan');
+
+  const wahInput = row.querySelector('.area-wah');
+
+
+  const rai = parseFloat(raiInput.value) || 0;
+
+  const ngan = parseFloat(nganInput.value) || 0;
+
+  const wah = parseFloat(wahInput.value) || 0;
+
+
+  const result = normalizeArea(rai, ngan, wah);
+
+
+  raiInput.value = result.rai;
+
+  nganInput.value = result.ngan;
+
+  wahInput.value = result.wah;
+
+  row.querySelector('.area-total').value = result.totalWah;
+
+
+  updateGrandTotal();
+
+}
+
+
+function updateGrandTotal() {
+
+  const allTotals = document.querySelectorAll('.area-total');
+
+  let grandTotalWah = 0;
+
+  allTotals.forEach(input => {
+
+    grandTotalWah += parseFloat(input.value) || 0;
+
+  });
+
+
+  document.getElementById('grand-total-area').innerText = grandTotalWah.toLocaleString();
+
+
+  const result = normalizeArea(0, 0, grandTotalWah);
+
+  document.getElementById('grand-total-rngw').innerText = 
+
+    `${result.rai} ไร่ ${result.ngan} งาน ${result.wah} ตารางวา`;
+
+}
+
+
+function removeRow(btn) {
+
+  btn.closest('.work-item').remove();
+
+  updateGrandTotal();
+
+}
+
+// === สิ้นสุดโค้ดที่วาง ===
 function logout() {
   localStorage.clear();
   window.location.href = '/login.html';
