@@ -177,8 +177,76 @@
 </div>
 </div>
 
-<button type="button" onclick="addWorkRow()" style="background:#28a745; color:#fff; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; margin-top:5px;">+ เพิ่มรายการงาน</button>
+<h4 style="margin-top:25px;">ส่วนที่ 2 ตารางสรุปปริมาณงานและวงเงินสัญญา</h4>
+<div style="overflow-x:auto;">
+<table id="summaryTable" style="width:100%; border-collapse:collapse; font-size:13px; min-width:900px;">
+  <thead>
+    <tr style="background:#fce4d6; text-align:center;">
+      <th style="border:1px solid #333; padding:6px;">รายการประเภทงาน</th>
+      <th style="border:1px solid #333; padding:6px;">ปริมาณงานทั้งหมด<br>ตามสัญญา (ตร.ม.)</th>
+      <th style="border:1px solid #333; padding:6px;">ปริมาณสะสมก่อนออก<br>ใบสั่งงานครั้งนี้ (ตร.ม.)</th>
+      <th style="border:1px solid #333; padding:6px;">ปริมาณงานสะสม<br>หลังออกใบสั่งงาน (ตร.ม.)</th>
+      <th style="border:1px solid #333; padding:6px;">ปริมาณงาน<br>คงเหลือ (ตร.ม.)</th>
+      <th style="border:1px solid #333; padding:6px;">วงเงินต่อหน่วย<br>ตามสัญญา</th>
+      <th style="border:1px solid #333; padding:6px;">วงเงินตามใบสั่งงาน<br>ครั้งนี้เป็นเงิน</th>
+      <th style="border:1px solid #333; padding:6px;">วงเงิน<br>คงเหลือ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr data-type="งานเบา">
+      <td style="border:1px solid #333; padding:6px;">1. งานตัดหญ้าและวัชพืชทั่วไป (งานเบา)</td>
+      <td style="border:1px solid #333;"><input type="number" class="sum-contract" value="471082" style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()"></td>
+      <td style="border:1px solid #333;"><input type="number" class="sum-before" value="0" style="width:100%; border:none; text-align:right;" onchange="updateSummaryTable()"></td>
+      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-after">0</td>
+      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain">0</td>
+      <td style="border:1px solid #333;"><input type="number" step="0.01" class="sum-rate" value="1.80" style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()"></td>
+      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-amount">0.00</td>
+      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain-amount">0.00</td>
+    </tr>
+    <tr data-type="งานกลาง">
+      <td style="border:1px solid #333; padding:6px;">2. งานถางวัชพืชและปรับเกลี่ยพื้นดิน (งานกลาง)</td>
+      <td style="border:1px solid #333;"><input type="number" class="sum-contract" value="96000" style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()"></td>
+      <td style="border:1px solid #333;"><input type="number" class="sum-before" value="0" style="width:100%; border:none; text-align:right;" onchange="updateSummaryTable()"></td>
+      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-after">0</td>
+      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain">0</td>
+      <td style="border:1px solid #333;"><input type="number" step="0.01" class="sum-rate" value="2.16" style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()"></td>
+      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-amount">0.00</td>
+      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain-amount">0.00</td>
+    </tr>
+    <tr data-type="งานหนัก">
+      <td style="border:1px solid #333; padding:6px;">3. งานถางป่าและขุดตอ (งานหนัก)</td>
+      <td style="border:1px solid #333;"><input type="number" class="sum-contract" value="11200" style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()"></td>
+      <td style="border:1px solid #333;"><input type="number" class="sum-before" value="0" style="width:100%; border:none; text-align:right;" onchange="updateSummaryTable()"></td>
+      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-after">0</td>
+      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain">0</td>
+      <td style="border:1px solid #333;"><input type="number" step="0.01" class="sum-rate" value="2.16" style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()"></td>
+      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-amount">0.00</td>
+      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain-amount">0.00</td>
+    </tr>
+    <tr style="background:#f7f7f7; font-weight:bold;">
+      <td colspan="6" style="border:1px solid #333; padding:8px; text-align:right;">จำนวนเงินรวมทั้งสิ้น</td>
+      <td style="border:1px solid #333; padding:6px; text-align:right;" id="sumGrandAmount">0.00</td>
+      <td style="border:1px solid #333; padding:6px; text-align:right;" id="sumGrandRemain">0.00</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
+<h4 style="margin-top:30px; text-align:center;">ผู้ออกใบสั่งงาน/ผู้แทนผู้ว่าจ้าง</h4>
+<div style="text-align:center;">
+  <canvas id="sigPad" width="420" height="160"
+    style="border:1px dashed #999; border-radius:6px; background:#fff; touch-action:none; cursor:crosshair;"></canvas>
+  <br>
+  <button type="button" onclick="clearSignature()"
+    style="background:#6c757d; color:#fff; border:none; padding:6px 14px; border-radius:4px; margin-top:6px;">
+    ล้างลายเซ็น
+  </button>
+  <div style="margin-top:10px;">
+    ( <input type="text" id="signerName" placeholder="พิมพ์ชื่อ-นามสกุล ผู้ลงนาม"
+      style="text-align:center; border:none; border-bottom:1px dotted #333; width:280px; padding:4px;"> )
+  </div>
+  <input type="hidden" id="signatureData">
+</div>
     <button class="primary" onclick="createJobOrder()">🚀 สร้างและส่งใบสั่งงาน</button>
     <div id="joResultLink"></div>
   </div>
@@ -254,6 +322,7 @@ function updateGrandTotal() {
   const result = normalizeArea(0, 0, grandTotalWah);
   document.getElementById('grand-total-rngw').innerText =
     `${result.rai} ไร่ ${result.ngan} งาน ${result.wah} ตารางวา`;
+     updateSummaryTable(); 
 }
 
 
@@ -329,7 +398,7 @@ function addWorkRow() {
   row.innerHTML = `
     <div>
       <label style="font-size:12px; color:#666;">ประเภทงาน</label>
-      <select class="work-type" style="padding:8px; border:1px solid #ccc; border-radius:4px;">
+      <select class="work-type" onchange="updateGrandTotal()" style="padding:8px; border:1px solid #ccc; border-radius:4px;">
         <option value="">-- เลือกประเภทงาน --</option>
         <option value="งานเบา">งานเบา</option>
         <option value="งานกลาง">งานกลาง</option>
@@ -441,7 +510,83 @@ async function loadJobOrders() {
     </tr>
   `).join('');
 }
+// === คำนวณตารางสรุปส่วนที่ 2 ===
+function updateSummaryTable() {
+  // 1) รวมปริมาณ ตร.ม. ของใบสั่งงานครั้งนี้ แยกตามประเภทงาน
+  const currentQty = { 'งานเบา': 0, 'งานกลาง': 0, 'งานหนัก': 0 };
+  document.querySelectorAll('.work-item').forEach(row => {
+    const type = row.querySelector('.work-type').value;
+    const sqm = parseFloat(row.querySelector('.area-sqm').value) || 0;
+    if (currentQty.hasOwnProperty(type)) currentQty[type] += sqm;
+  });
 
+  let grandAmount = 0, grandRemainAmount = 0;
+
+  document.querySelectorAll('#summaryTable tbody tr[data-type]').forEach(tr => {
+    const type = tr.dataset.type;
+    const contract = parseFloat(tr.querySelector('.sum-contract').value) || 0;
+    const before = parseFloat(tr.querySelector('.sum-before').value) || 0;
+    const rate = parseFloat(tr.querySelector('.sum-rate').value) || 0;
+    const thisTime = currentQty[type] || 0;
+
+    const after = before + thisTime;      // สะสมหลังออกใบสั่งงาน
+    const remain = contract - after;      // ปริมาณคงเหลือ
+    const amount = thisTime * rate;       // วงเงินครั้งนี้
+    const remainAmount = remain * rate;   // วงเงินคงเหลือ
+
+    tr.querySelector('.sum-after').innerText = after.toLocaleString();
+    tr.querySelector('.sum-remain').innerText = remain.toLocaleString();
+    tr.querySelector('.sum-amount').innerText = amount.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+    tr.querySelector('.sum-remain-amount').innerText = remainAmount.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+
+    // เตือนด้วยสีแดงหากเบิกเกินปริมาณตามสัญญา
+    tr.querySelector('.sum-remain').style.color = remain < 0 ? '#c0392b' : '#000';
+
+    grandAmount += amount;
+    grandRemainAmount += remainAmount;
+  });
+
+  document.getElementById('sumGrandAmount').innerText = grandAmount.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+  document.getElementById('sumGrandRemain').innerText = grandRemainAmount.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+// === ระบบลายเซ็น (รองรับทั้งเมาส์และนิ้วบนมือถือ) ===
+(function initSignature() {
+  const canvas = document.getElementById('sigPad');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = '#000';
+  let drawing = false;
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches ? e.touches[0] : e;
+    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+  }
+  function start(e) { e.preventDefault(); drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
+  function move(e) { if (!drawing) return; e.preventDefault(); const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }
+  function end() {
+    if (!drawing) return;
+    drawing = false;
+    document.getElementById('signatureData').value = canvas.toDataURL('image/png');
+  }
+
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  canvas.addEventListener('mouseup', end);
+  canvas.addEventListener('mouseleave', end);
+  canvas.addEventListener('touchstart', start, {passive:false});
+  canvas.addEventListener('touchmove', move, {passive:false});
+  canvas.addEventListener('touchend', end);
+})();
+
+function clearSignature() {
+  const canvas = document.getElementById('sigPad');
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+  document.getElementById('signatureData').value = '';
+}
 // เริ่มต้นโหลดข้อมูล
 loadContracts();
 addItemRow();
