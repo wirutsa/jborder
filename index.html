@@ -647,7 +647,7 @@
     function calcTotal() {
       let total = 0;
       document.querySelectorAll('.item-area').forEach(el => total += Number(el.value || 0));
-      document.getElementById('totalAreaDisplay').innerText = total.toFixed(2);
+      document.getElementById('grand-total-area').innerText = total.toFixed(2);
     }
 
     // ---------- CREATE JOB ORDER ----------
@@ -837,9 +837,21 @@
     }
     // เริ่มต้นโหลดข้อมูล
     loadContracts();
-    addItemRow();
+    addWorkRow();
     // เติมราคาตามสัญญาทันทีที่โหลดหน้าเว็บเสร็จ
     window.addEventListener('load', applyContractRates);
+
+// === สะพานเชื่อมชื่อฟังก์ชันเก่า → ใหม่ (Backward Compatibility) ===
+function addItemRow() {
+  return addWorkRow();
+}
+function removeItemRow(el) {
+  return removeRow(el);
+}
+function calcItemArea(el) {
+  return calcArea(el);
+}
+
   </script>
 </body>
 
