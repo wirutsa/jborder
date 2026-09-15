@@ -304,6 +304,35 @@
             style="width:130px; padding:8px; border:1px solid #ccc; border-radius:4px;" onchange="applyContractRates()">
         </div>
       </div>
+      <h4 style="margin-top:20px;">💰 งบประมาณตั้งต้น (บาท)</h4>
+      <div style="display:flex; gap:15px; flex-wrap:wrap; padding:15px; background:#e8f5e9; border:1px solid #c8e6c9; border-radius:6px; margin-bottom:20px;">
+
+  <div>
+
+    <label style="font-size:12px; color:#444;">งบงานเบา</label><br>
+
+    <input type="number" id="budget-start-light" value="847947.60" step="0.01" style="padding:8px; width:150px;" onchange="updateSummaryTable()">
+
+  </div>
+
+  <div>
+
+    <label style="font-size:12px; color:#444;">งบงานกลาง</label><br>
+
+    <input type="number" id="budget-start-medium" value="207360.00" step="0.01" style="padding:8px; width:150px;" onchange="updateSummaryTable()">
+
+  </div>
+
+  <div>
+
+    <label style="font-size:12px; color:#444;">งบงานหนัก</label><br>
+
+    <input type="number" id="budget-start-heavy" value="24192.00" step="0.01" style="padding:8px; width:150px;" onchange="updateSummaryTable()">
+
+  </div>
+
+</div>
+ 
       <h4 style="margin-top:20px;">รายการงาน / คำนวณพื้นที่</h4>
       <div id="work-items-container">
         <div class="work-item" style="display:flex; gap:8px; align-items:end; margin-bottom:10px; flex-wrap:wrap;">
@@ -753,6 +782,22 @@
 
       document.getElementById('sumGrandAmount').innerText = grandAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       document.getElementById('sumGrandRemain').innerText = grandRemainAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      // ในฟังก์ชัน updateSummaryTable ให้เพิ่มส่วนนี้เข้าไป
+document.querySelectorAll('#summaryTable tbody tr[data-type]').forEach(tr => {
+    const type = tr.dataset.type;
+    
+    // ดึงค่าจากช่องงบเริ่มต้นที่เราเพิ่งสร้าง
+    let startBudget = 0;
+    if (type === 'งานเบา') startBudget = document.getElementById('budget-start-light').value;
+    if (type === 'งานกลาง') startBudget = document.getElementById('budget-start-medium').value;
+    if (type === 'งานหนัก') startBudget = document.getElementById('budget-start-heavy').value;
+
+    // นำไปใส่ในตารางสรุปอัตโนมัติ
+    tr.querySelector('.sum-budget-start').value = startBudget;
+    
+    // ... คำนวณยอดคงเหลือต่อ ...
+});
     }
 
     // === ระบบลายเซ็น (รองรับทั้งเมาส์และนิ้วบนมือถือ) ===
