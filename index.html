@@ -120,7 +120,27 @@
     <textarea id="jo_safety" rows="2"></textarea>
     <label>การจัดการของเสีย</label>
     <textarea id="jo_waste" rows="2"></textarea>
-
+<h4 style="margin-top:20px;">💰 วงเงินต่อหน่วยตามสัญญา (บาท/ตร.ม.)</h4>
+<div style="display:flex; gap:12px; flex-wrap:wrap; padding:12px; background:#fff8e1; border:1px solid #ffe082; border-radius:6px; margin-bottom:15px;">
+  <div>
+    <label style="font-size:12px; color:#666;">งานเบา (ตัดหญ้า/วัชพืชทั่วไป)</label><br>
+    <input type="number" id="rate-light" value="1.80" step="0.01" min="0"
+      style="width:130px; padding:8px; border:1px solid #ccc; border-radius:4px;"
+      onchange="applyContractRates()">
+  </div>
+  <div>
+    <label style="font-size:12px; color:#666;">งานกลาง (ถางวัชพืช/ปรับเกลี่ยดิน)</label><br>
+    <input type="number" id="rate-medium" value="2.16" step="0.01" min="0"
+      style="width:130px; padding:8px; border:1px solid #ccc; border-radius:4px;"
+      onchange="applyContractRates()">
+  </div>
+  <div>
+    <label style="font-size:12px; color:#666;">งานหนัก (ถางป่า/ขุดตอ)</label><br>
+    <input type="number" id="rate-heavy" value="2.16" step="0.01" min="0"
+      style="width:130px; padding:8px; border:1px solid #ccc; border-radius:4px;"
+      onchange="applyContractRates()">
+  </div>
+</div>
     <h4 style="margin-top:20px;">รายการงาน / คำนวณพื้นที่</h4>
     <div id="work-items-container">
   <div class="work-item" style="display:flex; gap:8px; align-items:end; margin-bottom:10px; flex-wrap:wrap;">
@@ -155,7 +175,8 @@
     </div>
     <div>
       <label style="font-size:12px; color:#666;">ราคา/ตร.ม.</label>
-      <input type="number" class="unit-price" value="0" min="0" step="0.01" style="width:100px;" onchange="calcArea(this)">
+      <input type="number" class="unit-price" value="0" readonly
+  style="width:100px; background:#f0f0f0; cursor:not-allowed;" title="ค่านี้มาจากวงเงินต่อหน่วยตามสัญญาด้านบน">
     </div>
     <div>
       <label style="font-size:12px; color:#666;">เป็นเงิน (บาท)</label>
@@ -177,7 +198,7 @@
 </div>
 </div>
 
-<h4 style="margin-top:25px;">ส่วนที่ 2 ตารางสรุปปริมาณงานและวงเงินสัญญา</h4>
+<h4 style="margin-top:25px;"> ตารางสรุปปริมาณงานและวงเงินสัญญา</h4>
 <div style="overflow-x:auto;">
 <table id="summaryTable" style="width:100%; border-collapse:collapse; font-size:13px; min-width:900px;">
   <thead>
@@ -199,7 +220,7 @@
       <td style="border:1px solid #333;"><input type="number" class="sum-before" value="0" style="width:100%; border:none; text-align:right;" onchange="updateSummaryTable()"></td>
       <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-after">0</td>
       <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain">0</td>
-      <td style="border:1px solid #333;"><input type="number" step="0.01" class="sum-rate" value="1.80" style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()"></td>
+      <td style="border:1px solid #333;"><input type="number" step="0.01" class="sum-rate" value="1.80" readonly style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()"></td>
       <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-amount">0.00</td>
       <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain-amount">0.00</td>
     </tr>
@@ -209,7 +230,7 @@
       <td style="border:1px solid #333;"><input type="number" class="sum-before" value="0" style="width:100%; border:none; text-align:right;" onchange="updateSummaryTable()"></td>
       <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-after">0</td>
       <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain">0</td>
-      <td style="border:1px solid #333;"><input type="number" step="0.01" class="sum-rate" value="2.16" style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()"></td>
+      <td style="border:1px solid #333;"><input type="number" step="0.01" class="sum-rate" value="2.16" readonly style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()"></td>
       <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-amount">0.00</td>
       <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain-amount">0.00</td>
     </tr>
@@ -219,7 +240,7 @@
       <td style="border:1px solid #333;"><input type="number" class="sum-before" value="0" style="width:100%; border:none; text-align:right;" onchange="updateSummaryTable()"></td>
       <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-after">0</td>
       <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain">0</td>
-      <td style="border:1px solid #333;"><input type="number" step="0.01" class="sum-rate" value="2.16" style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()"></td>
+      <td style="border:1px solid #333;"><input type="number" step="0.01" class="sum-rate" value="2.16" readonly style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()"></td>
       <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-amount">0.00</td>
       <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain-amount">0.00</td>
     </tr>
@@ -398,7 +419,7 @@ function addWorkRow() {
   row.innerHTML = `
     <div>
       <label style="font-size:12px; color:#666;">ประเภทงาน</label>
-      <select class="work-type" onchange="updateGrandTotal()" style="padding:8px; border:1px solid #ccc; border-radius:4px;">
+      <select class="work-type" onchange="onchange="onWorkTypeChange(this)" style="padding:8px; border:1px solid #ccc; border-radius:4px;">
         <option value="">-- เลือกประเภทงาน --</option>
         <option value="งานเบา">งานเบา</option>
         <option value="งานกลาง">งานกลาง</option>
@@ -427,7 +448,8 @@ function addWorkRow() {
     </div>
     <div>
       <label style="font-size:12px; color:#666;">ราคา/ตร.ม.</label>
-      <input type="number" class="unit-price" value="0" min="0" step="0.01" style="width:100px;" onchange="calcArea(this)">
+      <input type="number" class="unit-price" value="0" readonly
+  style="width:100px; background:#f0f0f0; cursor:not-allowed;" title="ค่านี้มาจากวงเงินต่อหน่วยตามสัญญาด้านบน">
     </div>
     <div>
       <label style="font-size:12px; color:#666;">เป็นเงิน (บาท)</label>
@@ -435,8 +457,10 @@ function addWorkRow() {
     </div>
     <button type="button" style="background:#dc3545; color:white; border:none; padding:8px 12px; border-radius:4px;" onclick="removeRow(this)">ลบ</button>
   `;
-  container.appendChild(row);
-  updateGrandTotal();
+    container.appendChild(row);
+  applyContractRates();   // <<< เปลี่ยนบรรทัดนี้ ให้แถวใหม่ได้ราคาตามสัญญาทันที
+}
+
 }
 
 function calcTotal() {
@@ -587,9 +611,54 @@ function clearSignature() {
   canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
   document.getElementById('signatureData').value = '';
 }
+// === ดึงราคาต่อหน่วยตามประเภทงาน ===
+function getContractRate(type) {
+  if (type === 'งานเบา')  return parseFloat(document.getElementById('rate-light').value)  || 0;
+  if (type === 'งานกลาง') return parseFloat(document.getElementById('rate-medium').value) || 0;
+  if (type === 'งานหนัก') return parseFloat(document.getElementById('rate-heavy').value)  || 0;
+  return 0;
+}
+
+// === กระจายราคาไปทุกจุดในระบบ ===
+function applyContractRates() {
+  // 2.1 เติมราคาลงทุกแถวในตารางรายการงาน
+  document.querySelectorAll('.work-item').forEach(row => {
+    const type = row.querySelector('.work-type').value;
+    row.querySelector('.unit-price').value = getContractRate(type).toFixed(2);
+  });
+
+  // 2.2 เติมราคาลงตารางสรุปส่วนที่ 2
+  document.querySelectorAll('#summaryTable tbody tr[data-type]').forEach(tr => {
+    tr.querySelector('.sum-rate').value = getContractRate(tr.dataset.type).toFixed(2);
+  });
+
+  // 2.3 คำนวณเงินใหม่ทุกแถว
+  recalcAllRows();
+}
+
+// === คำนวณใหม่ทุกแถว ===
+function recalcAllRows() {
+  document.querySelectorAll('.work-item').forEach(row => {
+    const totalWah = parseFloat(row.querySelector('.area-total').value) || 0;
+    const sqm = totalWah * 4;
+    const price = parseFloat(row.querySelector('.unit-price').value) || 0;
+    row.querySelector('.area-sqm').value = sqm;
+    row.querySelector('.row-amount').value = (sqm * price).toFixed(2);
+  });
+  updateGrandTotal();
+}
+
+// === เมื่อผู้ใช้เปลี่ยนประเภทงานในแถวใดแถวหนึ่ง ===
+function onWorkTypeChange(el) {
+  const row = el.closest('.work-item');
+  row.querySelector('.unit-price').value = getContractRate(el.value).toFixed(2);
+  calcArea(el);
+}
 // เริ่มต้นโหลดข้อมูล
 loadContracts();
 addItemRow();
+// เติมราคาตามสัญญาทันทีที่โหลดหน้าเว็บเสร็จ
+window.addEventListener('load', applyContractRates);
 </script>
 </body>
 </html>
