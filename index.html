@@ -1,422 +1,606 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-<meta charset="UTF-8">
-<title>ระบบใบสั่งงาน EECO - หน้าเจ้าหน้าที่</title>
-<style>
-  * { box-sizing: border-box; }
-  body { font-family: 'Segoe UI', sans-serif; background: #f2f4f7; margin: 0; }
-  header { background: #0b5394; color: #fff; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; }
-  header h2 { margin: 0; }
-  header button { background: #fff; color: #0b5394; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
-  .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
-  .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-  .tab-btn { padding: 10px 20px; border: none; background: #ddd; border-radius: 6px 6px 0 0; cursor: pointer; }
-  .tab-btn.active { background: #0b5394; color: #fff; }
-  .panel { background: #fff; padding: 20px; border-radius: 0 8px 8px 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); display: none; }
-  .panel.active { display: block; }
-  label { display: block; margin-top: 10px; font-weight: 600; font-size: 14px; }
-  input, select, textarea { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 5px; }
-  .row { display: flex; gap: 15px; flex-wrap: wrap; }
-  .row > div { flex: 1; min-width: 200px; }
-  button.primary { background: #0b5394; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin-top: 15px; }
-  button.secondary { background: #27ae60; color: #fff; border: none; padding: 8px 14px; border-radius: 5px; cursor: pointer; }
-  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-  th, td { border: 1px solid #ddd; padding: 8px; font-size: 14px; text-align: left; }
-  th { background: #f0f2f5; }
-  .status { padding: 3px 10px; border-radius: 12px; font-size: 12px; color: #fff; }
-  .status.issued { background: #f39c12; }
-  .status.signed { background: #27ae60; }
-  .item-row { display: flex; gap: 10px; margin-top: 8px; align-items: center; }
-  .item-row input { flex: 1; }
-  .item-row button { background: #e74c3c; color: #fff; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; }
-  .link-box { background: #f0f8ff; padding: 10px; border-radius: 6px; margin-top: 10px; word-break: break-all; }
-</style>
+  <meta charset="UTF-8">
+  <title>ระบบใบสั่งงาน EECO - หน้าเจ้าหน้าที่</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f2f4f7;
+      margin: 0;
+    }
+
+    header {
+      background: #0b5394;
+      color: #fff;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h2 {
+      margin: 0;
+    }
+
+    header button {
+      background: #fff;
+      color: #0b5394;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      border: none;
+      background: #ddd;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: #0b5394;
+      color: #fff;
+    }
+
+    .panel {
+      background: #fff;
+      padding: 20px;
+      border-radius: 0 8px 8px 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .row>div {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    button.primary {
+      background: #0b5394;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    button.secondary {
+      background: #27ae60;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      font-size: 14px;
+      text-align: left;
+    }
+
+    th {
+      background: #f0f2f5;
+    }
+
+    .status {
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      color: #fff;
+    }
+
+    .status.issued {
+      background: #f39c12;
+    }
+
+    .status.signed {
+      background: #27ae60;
+    }
+
+    .item-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+      align-items: center;
+    }
+
+    .item-row input {
+      flex: 1;
+    }
+
+    .item-row button {
+      background: #e74c3c;
+      color: #fff;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .link-box {
+      background: #f0f8ff;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 10px;
+      word-break: break-all;
+    }
+  </style>
 </head>
+
 <body>
 
-<header>
-  <h2>📋 ระบบใบสั่งงาน EECO</h2>
-  <div>
-    <span id="userName" style="margin-right:15px;"></span>
-    <button onclick="logout()">ออกจากระบบ</button>
-  </div>
-</header>
-
-<div class="container">
-  <div class="tabs">
-    <button class="tab-btn active" onclick="showTab('contracts')">📑 สัญญา</button>
-    <button class="tab-btn" onclick="showTab('joborders')">📝 ใบสั่งงาน</button>
-    <button class="tab-btn" onclick="showTab('createjo')">➕ สร้างใบสั่งงานใหม่</button>
-  </div>
-
-  <!-- TAB 1: CONTRACTS -->
-  <div id="tab-contracts" class="panel active">
-    <h3>สร้างสัญญาใหม่</h3>
-    <div class="row">
-      <div><label>เลขที่สัญญา</label><input id="c_no" placeholder="เช่น EECO-001/2569"></div>
-      <div><label>ชื่อผู้รับจ้าง</label><input id="c_name" placeholder="บริษัท/ผู้รับจ้าง"></div>
-    </div>
-    <div class="row">
-      <div><label>พื้นที่รวมตามสัญญา (ตร.ม.)</label><input id="c_area" type="number"></div>
-      <div><label>มูลค่ารวมสัญญา (บาท)</label><input id="c_value" type="number"></div>
-    </div>
-    <div class="row">
-      <div><label>Email ผู้รับจ้าง (แจ้งเตือน)</label><input id="c_email" type="email"></div>
-      <div><label>LINE User ID ผู้รับจ้าง (แจ้งเตือน)</label><input id="c_line"></div>
-    </div>
-    <button class="primary" onclick="createContract()">💾 บันทึกสัญญา</button>
-
-    <h3 style="margin-top:30px;">รายการสัญญาทั้งหมด</h3>
-    <table>
-      <thead><tr><th>เลขที่สัญญา</th><th>ผู้รับจ้าง</th><th>พื้นที่รวม</th><th>มูลค่ารวม</th></tr></thead>
-      <tbody id="contractTable"></tbody>
-    </table>
-  </div>
-
-  <!-- TAB 2: JOB ORDERS LIST -->
-  <div id="tab-joborders" class="panel">
-    <h3>รายการใบสั่งงานทั้งหมด</h3>
-    <table>
-      <thead><tr><th>เลขที่ใบสั่งงาน</th><th>วันที่ออก</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
-      <tbody id="jobOrderTable"></tbody>
-    </table>
-  </div>
-
-  <!-- TAB 3: CREATE JOB ORDER -->
-  <div id="tab-createjo" class="panel">
-    <h3>สร้างใบสั่งงานใหม่</h3>
-    <label>เลือกสัญญา</label>
-    <select id="jo_contract"></select>
-
-    <div class="row">
-      <div><label>เลขที่ใบสั่งงาน</label><input id="jo_no" placeholder="เช่น JO-001/2569"></div>
-      <div><label>วันที่ออกใบสั่งงาน</label><input id="jo_issued" type="date"></div>
-    </div>
-    <div class="row">
-      <div><label>วันที่ส่งมอบพื้นที่</label><input id="jo_delivery" type="date"></div>
-      <div><label>วันที่สำรวจ</label><input id="jo_survey" type="date"></div>
-    </div>
-    <div class="row">
-      <div><label>วันที่เริ่มงาน</label><input id="jo_start" type="date"></div>
-      <div><label>ระยะเวลาดำเนินงาน (วัน)</label><input id="jo_duration" type="number"></div>
-    </div>
-    <div class="row">
-      <div><label>ผู้จัดทำ</label><input id="jo_prepared"></div>
-      <div><label>หน่วยงาน/แผนก</label><input id="jo_dept"></div>
-    </div>
-
-    <label>รายละเอียดงาน</label>
-    <textarea id="jo_detail" rows="3"></textarea>
-
-    <div class="row">
-      <div><label>ผู้ปฏิบัติงาน</label><input id="jo_workers"></div>
-      <div><label>เครื่องมือ/อุปกรณ์</label><input id="jo_equipment"></div>
-    </div>
-
-    <label>ข้อจำกัดพื้นที่</label>
-    <textarea id="jo_restrict" rows="2"></textarea>
-    <label>เงื่อนไขความปลอดภัย</label>
-    <textarea id="jo_safety" rows="2"></textarea>
-    <label>การจัดการของเสีย</label>
-    <textarea id="jo_waste" rows="2"></textarea>
-<h4 style="margin-top:20px;">💰 วงเงินต่อหน่วยตามสัญญา (บาท/ตร.ม.)</h4>
-<div style="display:flex; gap:12px; flex-wrap:wrap; padding:12px; background:#fff8e1; border:1px solid #ffe082; border-radius:6px; margin-bottom:15px;">
-  <div>
-    <label style="font-size:12px; color:#666;">งานเบา (ตัดหญ้า/วัชพืชทั่วไป)</label><br>
-    <input type="number" id="rate-light" value="1.80" step="0.01" min="0"
-      style="width:130px; padding:8px; border:1px solid #ccc; border-radius:4px;"
-      onchange="applyContractRates()">
-  </div>
-  <div>
-    <label style="font-size:12px; color:#666;">งานกลาง (ถางวัชพืช/ปรับเกลี่ยดิน)</label><br>
-    <input type="number" id="rate-medium" value="2.16" step="0.01" min="0"
-      style="width:130px; padding:8px; border:1px solid #ccc; border-radius:4px;"
-      onchange="applyContractRates()">
-  </div>
-  <div>
-    <label style="font-size:12px; color:#666;">งานหนัก (ถางป่า/ขุดตอ)</label><br>
-    <input type="number" id="rate-heavy" value="2.16" step="0.01" min="0"
-      style="width:130px; padding:8px; border:1px solid #ccc; border-radius:4px;"
-      onchange="applyContractRates()">
-  </div>
-</div>
-    <h4 style="margin-top:20px;">รายการงาน / คำนวณพื้นที่</h4>
-    <div id="work-items-container">
-  <div class="work-item" style="display:flex; gap:8px; align-items:end; margin-bottom:10px; flex-wrap:wrap;">
+  <header>
+    <h2>📋 ระบบใบสั่งงาน EECO</h2>
     <div>
-      <label style="font-size:12px; color:#666;">ประเภทงาน</label>
-      <select class="work-type" style="padding:8px; border:1px solid #ccc; border-radius:4px;">
-        <option value="">-- เลือกประเภทงาน --</option>
-        <option value="งานเบา">งานเบา</option>
-        <option value="งานกลาง">งานกลาง</option>
-        <option value="งานหนัก">งานหนัก</option>
-      </select>
+      <span id="userName" style="margin-right:15px;"></span>
+      <button onclick="logout()">ออกจากระบบ</button>
     </div>
-    <div>
-      <label style="font-size:12px; color:#666;">ไร่</label>
-      <input type="number" class="area-rai" value="0" min="0" style="width:80px;" onchange="calcArea(this)">
-    </div>
-    <div>
-      <label style="font-size:12px; color:#666;">งาน</label>
-      <input type="number" class="area-ngan" value="0" min="0" style="width:80px;" onchange="calcArea(this)">
-    </div>
-    <div>
-      <label style="font-size:12px; color:#666;">ตารางวา</label>
-      <input type="number" class="area-wah" value="0" min="0" style="width:90px;" onchange="calcArea(this)">
-    </div>
-    <div>
-      <label style="font-size:12px; color:#666;">รวม (ตร.วา)</label>
-      <input type="number" class="area-total" value="0" readonly style="width:100px; background:#f0f0f0;">
-    </div>
-    <div>
-      <label style="font-size:12px; color:#666;">รวม (ตร.ม.)</label>
-      <input type="number" class="area-sqm" value="0" readonly style="width:100px; background:#f0f0f0;">
-    </div>
-    <div>
-      <label style="font-size:12px; color:#666;">ราคา/ตร.ม.</label>
-      <input type="number" class="unit-price" value="0" readonly
-  style="width:100px; background:#f0f0f0; cursor:not-allowed;" title="ค่านี้มาจากวงเงินต่อหน่วยตามสัญญาด้านบน">
-    </div>
-    <div>
-      <label style="font-size:12px; color:#666;">เป็นเงิน (บาท)</label>
-      <input type="number" class="row-amount" value="0" readonly style="width:110px; background:#fff3cd;">
-    </div>
-    <button type="button" style="background:#dc3545; color:white; border:none; padding:8px 12px; border-radius:4px;" onclick="removeRow(this)">ลบ</button>
-  </div>
-</div>
+  </header>
 
-<button type="button" onclick="addWorkRow()" style="background:#28a745; color:#fff; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; margin-top:5px;">+ เพิ่มรายการงาน</button>
+  <div class="container">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('contracts')">📑 สัญญา</button>
+      <button class="tab-btn" onclick="showTab('joborders')">📝 ใบสั่งงาน</button>
+      <button class="tab-btn" onclick="showTab('createjo')">➕ สร้างใบสั่งงานใหม่</button>
+    </div>
 
-<div style="margin-top:15px; padding:12px; background:#e8f4fd; border-radius:6px; line-height:1.9; margin-bottom:15px;">
-  <strong>สรุปพื้นที่รวมใบสั่งงานนี้:</strong><br>
-  <span id="grand-total-rngw" style="color:#0b5394; font-weight:bold;">0 ไร่ 0 งาน 0 ตารางวา</span><br>
-  รวม: <span id="grand-total-area" style="font-weight:bold;">0</span> ตารางวา
-  &nbsp;|&nbsp;
-  คิดเป็น: <span id="grand-total-sqm" style="font-weight:bold; color:#b8860b;">0</span> ตารางเมตร<br>
-  <strong style="color:#c0392b;">รวมเป็นเงินทั้งสิ้น: <span id="grand-total-price">0.00</span> บาท</strong>
-</div>
-</div>
+    <!-- TAB 1: CONTRACTS -->
+    <div id="tab-contracts" class="panel active">
+      <h3>สร้างสัญญาใหม่</h3>
+      <div class="row">
+        <div><label>เลขที่สัญญา</label><input id="c_no" placeholder="เช่น EECO-001/2569"></div>
+        <div><label>ชื่อผู้รับจ้าง</label><input id="c_name" placeholder="บริษัท/ผู้รับจ้าง"></div>
+      </div>
+      <div class="row">
+        <div><label>พื้นที่รวมตามสัญญา (ตร.ม.)</label><input id="c_area" type="number"></div>
+        <div><label>มูลค่ารวมสัญญา (บาท)</label><input id="c_value" type="number"></div>
+      </div>
+      <div class="row">
+        <div><label>Email ผู้รับจ้าง (แจ้งเตือน)</label><input id="c_email" type="email"></div>
+        <div><label>LINE User ID ผู้รับจ้าง (แจ้งเตือน)</label><input id="c_line"></div>
+      </div>
+      <button class="primary" onclick="createContract()">💾 บันทึกสัญญา</button>
 
-<h4 style="margin-top:25px;"> ตารางสรุปปริมาณงานและวงเงินสัญญา</h4>
-<div style="overflow-x:auto;">
-<table id="summaryTable" style="width:100%; border-collapse:collapse; font-size:13px; min-width:900px;">
-  <thead>
-    <tr style="background:#fce4d6; text-align:center;">
-      <th style="border:1px solid #333; padding:6px;">รายการประเภทงาน</th>
-      <th style="border:1px solid #333; padding:6px;">ปริมาณงานทั้งหมด<br>ตามสัญญา (ตร.ม.)</th>
-      <th style="border:1px solid #333; padding:6px;">ปริมาณสะสมก่อนออก<br>ใบสั่งงานครั้งนี้ (ตร.ม.)</th>
-      <th style="border:1px solid #333; padding:6px;">ปริมาณงานสะสม<br>หลังออกใบสั่งงาน (ตร.ม.)</th>
-      <th style="border:1px solid #333; padding:6px;">ปริมาณงาน<br>คงเหลือ (ตร.ม.)</th>
-      <th style="border:1px solid #333; padding:6px;">วงเงินต่อหน่วย<br>ตามสัญญา</th>
-      <th style="border:1px solid #333; padding:6px;">วงเงินตามใบสั่งงาน<br>ครั้งนี้เป็นเงิน</th>
-      <th style="border:1px solid #333; padding:6px;">วงเงิน<br>คงเหลือ</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr data-type="งานเบา">
-      <td style="border:1px solid #333; padding:6px;">1. งานตัดหญ้าและวัชพืชทั่วไป (งานเบา)</td>
-      <td style="border:1px solid #333;"><input type="number" class="sum-contract" value="471082" style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()"></td>
-      <td style="border:1px solid #333;"><input type="number" class="sum-before" value="0" style="width:100%; border:none; text-align:right;" onchange="updateSummaryTable()"></td>
-      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-after">0</td>
-      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain">0</td>
-      <td style="border:1px solid #333;"><input type="number" step="0.01" class="sum-rate" value="1.80" readonly style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()"></td>
-      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-amount">0.00</td>
-      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain-amount">0.00</td>
-    </tr>
-    <tr data-type="งานกลาง">
-      <td style="border:1px solid #333; padding:6px;">2. งานถางวัชพืชและปรับเกลี่ยพื้นดิน (งานกลาง)</td>
-      <td style="border:1px solid #333;"><input type="number" class="sum-contract" value="96000" style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()"></td>
-      <td style="border:1px solid #333;"><input type="number" class="sum-before" value="0" style="width:100%; border:none; text-align:right;" onchange="updateSummaryTable()"></td>
-      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-after">0</td>
-      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain">0</td>
-      <td style="border:1px solid #333;"><input type="number" step="0.01" class="sum-rate" value="2.16" readonly style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()"></td>
-      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-amount">0.00</td>
-      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain-amount">0.00</td>
-    </tr>
-    <tr data-type="งานหนัก">
-      <td style="border:1px solid #333; padding:6px;">3. งานถางป่าและขุดตอ (งานหนัก)</td>
-      <td style="border:1px solid #333;"><input type="number" class="sum-contract" value="11200" style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()"></td>
-      <td style="border:1px solid #333;"><input type="number" class="sum-before" value="0" style="width:100%; border:none; text-align:right;" onchange="updateSummaryTable()"></td>
-      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-after">0</td>
-      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain">0</td>
-      <td style="border:1px solid #333;"><input type="number" step="0.01" class="sum-rate" value="2.16" readonly style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()"></td>
-      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-amount">0.00</td>
-      <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain-amount">0.00</td>
-    </tr>
-    <tr style="background:#f7f7f7; font-weight:bold;">
-      <td colspan="6" style="border:1px solid #333; padding:8px; text-align:right;">จำนวนเงินรวมทั้งสิ้น</td>
-      <td style="border:1px solid #333; padding:6px; text-align:right;" id="sumGrandAmount">0.00</td>
-      <td style="border:1px solid #333; padding:6px; text-align:right;" id="sumGrandRemain">0.00</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+      <h3 style="margin-top:30px;">รายการสัญญาทั้งหมด</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>เลขที่สัญญา</th>
+            <th>ผู้รับจ้าง</th>
+            <th>พื้นที่รวม</th>
+            <th>มูลค่ารวม</th>
+          </tr>
+        </thead>
+        <tbody id="contractTable"></tbody>
+      </table>
+    </div>
 
-<h4 style="margin-top:30px; text-align:center;">ผู้ออกใบสั่งงาน/ผู้แทนผู้ว่าจ้าง</h4>
-<div style="text-align:center;">
-  <canvas id="sigPad" width="420" height="160"
-    style="border:1px dashed #999; border-radius:6px; background:#fff; touch-action:none; cursor:crosshair;"></canvas>
-  <br>
-  <button type="button" onclick="clearSignature()"
-    style="background:#6c757d; color:#fff; border:none; padding:6px 14px; border-radius:4px; margin-top:6px;">
-    ล้างลายเซ็น
-  </button>
-  <div style="margin-top:10px;">
-    ( <input type="text" id="signerName" placeholder="พิมพ์ชื่อ-นามสกุล ผู้ลงนาม"
-      style="text-align:center; border:none; border-bottom:1px dotted #333; width:280px; padding:4px;"> )
-  </div>
-  <input type="hidden" id="signatureData">
-</div>
+    <!-- TAB 2: JOB ORDERS LIST -->
+    <div id="tab-joborders" class="panel">
+      <h3>รายการใบสั่งงานทั้งหมด</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>เลขที่ใบสั่งงาน</th>
+            <th>วันที่ออก</th>
+            <th>สถานะ</th>
+            <th>จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="jobOrderTable"></tbody>
+      </table>
+    </div>
+
+    <!-- TAB 3: CREATE JOB ORDER -->
+    <div id="tab-createjo" class="panel">
+      <h3>สร้างใบสั่งงานใหม่</h3>
+      <label>เลือกสัญญา</label>
+      <select id="jo_contract"></select>
+
+      <div class="row">
+        <div><label>เลขที่ใบสั่งงาน</label><input id="jo_no" placeholder="เช่น JO-001/2569"></div>
+        <div><label>วันที่ออกใบสั่งงาน</label><input id="jo_issued" type="date"></div>
+      </div>
+      <div class="row">
+        <div><label>วันที่ส่งมอบพื้นที่</label><input id="jo_delivery" type="date"></div>
+        <div><label>วันที่สำรวจ</label><input id="jo_survey" type="date"></div>
+      </div>
+      <div class="row">
+        <div><label>วันที่เริ่มงาน</label><input id="jo_start" type="date"></div>
+        <div><label>ระยะเวลาดำเนินงาน (วัน)</label><input id="jo_duration" type="number"></div>
+      </div>
+      <div class="row">
+        <div><label>ผู้จัดทำ</label><input id="jo_prepared"></div>
+        <div><label>หน่วยงาน/แผนก</label><input id="jo_dept"></div>
+      </div>
+
+      <label>รายละเอียดงาน</label>
+      <textarea id="jo_detail" rows="3"></textarea>
+
+      <div class="row">
+        <div><label>ผู้ปฏิบัติงาน</label><input id="jo_workers"></div>
+        <div><label>เครื่องมือ/อุปกรณ์</label><input id="jo_equipment"></div>
+      </div>
+
+      <label>ข้อจำกัดพื้นที่</label>
+      <textarea id="jo_restrict" rows="2"></textarea>
+      <label>เงื่อนไขความปลอดภัย</label>
+      <textarea id="jo_safety" rows="2"></textarea>
+      <label>การจัดการของเสีย</label>
+      <textarea id="jo_waste" rows="2"></textarea>
+      <h4 style="margin-top:20px;">💰 วงเงินต่อหน่วยตามสัญญา (บาท/ตร.ม.)</h4>
+      <div
+        style="display:flex; gap:12px; flex-wrap:wrap; padding:12px; background:#fff8e1; border:1px solid #ffe082; border-radius:6px; margin-bottom:15px;">
+        <div>
+          <label style="font-size:12px; color:#666;">งานเบา (ตัดหญ้า/วัชพืชทั่วไป)</label><br>
+          <input type="number" id="rate-light" value="1.80" step="0.01" min="0"
+            style="width:130px; padding:8px; border:1px solid #ccc; border-radius:4px;" onchange="applyContractRates()">
+        </div>
+        <div>
+          <label style="font-size:12px; color:#666;">งานกลาง (ถางวัชพืช/ปรับเกลี่ยดิน)</label><br>
+          <input type="number" id="rate-medium" value="2.16" step="0.01" min="0"
+            style="width:130px; padding:8px; border:1px solid #ccc; border-radius:4px;" onchange="applyContractRates()">
+        </div>
+        <div>
+          <label style="font-size:12px; color:#666;">งานหนัก (ถางป่า/ขุดตอ)</label><br>
+          <input type="number" id="rate-heavy" value="2.16" step="0.01" min="0"
+            style="width:130px; padding:8px; border:1px solid #ccc; border-radius:4px;" onchange="applyContractRates()">
+        </div>
+      </div>
+      <h4 style="margin-top:20px;">รายการงาน / คำนวณพื้นที่</h4>
+      <div id="work-items-container">
+        <div class="work-item" style="display:flex; gap:8px; align-items:end; margin-bottom:10px; flex-wrap:wrap;">
+          <div>
+            <label style="font-size:12px; color:#666;">ประเภทงาน</label>
+            <select class="work-type" style="padding:8px; border:1px solid #ccc; border-radius:4px;">
+              <option value="">-- เลือกประเภทงาน --</option>
+              <option value="งานเบา">งานเบา</option>
+              <option value="งานกลาง">งานกลาง</option>
+              <option value="งานหนัก">งานหนัก</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px; color:#666;">ไร่</label>
+            <input type="number" class="area-rai" value="0" min="0" style="width:80px;" onchange="calcArea(this)">
+          </div>
+          <div>
+            <label style="font-size:12px; color:#666;">งาน</label>
+            <input type="number" class="area-ngan" value="0" min="0" style="width:80px;" onchange="calcArea(this)">
+          </div>
+          <div>
+            <label style="font-size:12px; color:#666;">ตารางวา</label>
+            <input type="number" class="area-wah" value="0" min="0" style="width:90px;" onchange="calcArea(this)">
+          </div>
+          <div>
+            <label style="font-size:12px; color:#666;">รวม (ตร.วา)</label>
+            <input type="number" class="area-total" value="0" readonly style="width:100px; background:#f0f0f0;">
+          </div>
+          <div>
+            <label style="font-size:12px; color:#666;">รวม (ตร.ม.)</label>
+            <input type="number" class="area-sqm" value="0" readonly style="width:100px; background:#f0f0f0;">
+          </div>
+          <div>
+            <label style="font-size:12px; color:#666;">ราคา/ตร.ม.</label>
+            <input type="number" class="unit-price" value="0" readonly
+              style="width:100px; background:#f0f0f0; cursor:not-allowed;"
+              title="ค่านี้มาจากวงเงินต่อหน่วยตามสัญญาด้านบน">
+          </div>
+          <div>
+            <label style="font-size:12px; color:#666;">เป็นเงิน (บาท)</label>
+            <input type="number" class="row-amount" value="0" readonly style="width:110px; background:#fff3cd;">
+          </div>
+          <button type="button"
+            style="background:#dc3545; color:white; border:none; padding:8px 12px; border-radius:4px;"
+            onclick="removeRow(this)">ลบ</button>
+        </div>
+      </div>
+
+      <button type="button" onclick="addWorkRow()"
+        style="background:#28a745; color:#fff; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; margin-top:5px;">+
+        เพิ่มรายการงาน</button>
+
+      <div
+        style="margin-top:15px; padding:12px; background:#e8f4fd; border-radius:6px; line-height:1.9; margin-bottom:15px;">
+        <strong>สรุปพื้นที่รวมใบสั่งงานนี้:</strong><br>
+        <span id="grand-total-rngw" style="color:#0b5394; font-weight:bold;">0 ไร่ 0 งาน 0 ตารางวา</span><br>
+        รวม: <span id="grand-total-area" style="font-weight:bold;">0</span> ตารางวา
+        &nbsp;|&nbsp;
+        คิดเป็น: <span id="grand-total-sqm" style="font-weight:bold; color:#b8860b;">0</span> ตารางเมตร<br>
+        <strong style="color:#c0392b;">รวมเป็นเงินทั้งสิ้น: <span id="grand-total-price">0.00</span> บาท</strong>
+      </div>
+    </div>
+
+    <h4 style="margin-top:25px;"> ตารางสรุปปริมาณงานและวงเงินสัญญา</h4>
+    <div style="overflow-x:auto;">
+      <table id="summaryTable" style="width:100%; border-collapse:collapse; font-size:13px; min-width:900px;">
+        <thead>
+          <tr style="background:#fce4d6; text-align:center;">
+            <th style="border:1px solid #333; padding:6px;">รายการประเภทงาน</th>
+            <th style="border:1px solid #333; padding:6px;">ปริมาณงานทั้งหมด<br>ตามสัญญา (ตร.ม.)</th>
+            <th style="border:1px solid #333; padding:6px;">ปริมาณสะสมก่อนออก<br>ใบสั่งงานครั้งนี้ (ตร.ม.)</th>
+            <th style="border:1px solid #333; padding:6px;">ปริมาณงานสะสม<br>หลังออกใบสั่งงาน (ตร.ม.)</th>
+            <th style="border:1px solid #333; padding:6px;">ปริมาณงาน<br>คงเหลือ (ตร.ม.)</th>
+            <th style="border:1px solid #333; padding:6px;">วงเงินต่อหน่วย<br>ตามสัญญา</th>
+            <th style="border:1px solid #333; padding:6px;">วงเงินตามใบสั่งงาน<br>ครั้งนี้เป็นเงิน</th>
+            <th style="border:1px solid #333; padding:6px;">วงเงิน<br>คงเหลือ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-type="งานเบา">
+            <td style="border:1px solid #333; padding:6px;">1. งานตัดหญ้าและวัชพืชทั่วไป (งานเบา)</td>
+            <td style="border:1px solid #333;"><input type="number" class="sum-contract" value="471082"
+                style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()">
+            </td>
+            <td style="border:1px solid #333;"><input type="number" class="sum-before" value="0"
+                style="width:100%; border:none; text-align:right;" onchange="updateSummaryTable()"></td>
+            <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-after">0</td>
+            <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain">0</td>
+            <td style="border:1px solid #333;"><input type="number" step="0.01" class="sum-rate" value="1.80" readonly
+                style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()">
+            </td>
+            <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-amount">0.00</td>
+            <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain-amount">0.00</td>
+          </tr>
+          <tr data-type="งานกลาง">
+            <td style="border:1px solid #333; padding:6px;">2. งานถางวัชพืชและปรับเกลี่ยพื้นดิน (งานกลาง)</td>
+            <td style="border:1px solid #333;"><input type="number" class="sum-contract" value="96000"
+                style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()">
+            </td>
+            <td style="border:1px solid #333;"><input type="number" class="sum-before" value="0"
+                style="width:100%; border:none; text-align:right;" onchange="updateSummaryTable()"></td>
+            <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-after">0</td>
+            <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain">0</td>
+            <td style="border:1px solid #333;"><input type="number" step="0.01" class="sum-rate" value="2.16" readonly
+                style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()">
+            </td>
+            <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-amount">0.00</td>
+            <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain-amount">0.00</td>
+          </tr>
+          <tr data-type="งานหนัก">
+            <td style="border:1px solid #333; padding:6px;">3. งานถางป่าและขุดตอ (งานหนัก)</td>
+            <td style="border:1px solid #333;"><input type="number" class="sum-contract" value="11200"
+                style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()">
+            </td>
+            <td style="border:1px solid #333;"><input type="number" class="sum-before" value="0"
+                style="width:100%; border:none; text-align:right;" onchange="updateSummaryTable()"></td>
+            <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-after">0</td>
+            <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain">0</td>
+            <td style="border:1px solid #333;"><input type="number" step="0.01" class="sum-rate" value="2.16" readonly
+                style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()">
+            </td>
+            <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-amount">0.00</td>
+            <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain-amount">0.00</td>
+          </tr>
+          <tr style="background:#f7f7f7; font-weight:bold;">
+            <td colspan="6" style="border:1px solid #333; padding:8px; text-align:right;">จำนวนเงินรวมทั้งสิ้น</td>
+            <td style="border:1px solid #333; padding:6px; text-align:right;" id="sumGrandAmount">0.00</td>
+            <td style="border:1px solid #333; padding:6px; text-align:right;" id="sumGrandRemain">0.00</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:30px; text-align:center;">ผู้ออกใบสั่งงาน/ผู้แทนผู้ว่าจ้าง</h4>
+    <div style="text-align:center;">
+      <canvas id="sigPad" width="420" height="160"
+        style="border:1px dashed #999; border-radius:6px; background:#fff; touch-action:none; cursor:crosshair;"></canvas>
+      <br>
+      <button type="button" onclick="clearSignature()"
+        style="background:#6c757d; color:#fff; border:none; padding:6px 14px; border-radius:4px; margin-top:6px;">
+        ล้างลายเซ็น
+      </button>
+      <div style="margin-top:10px;">
+        ( <input type="text" id="signerName" placeholder="พิมพ์ชื่อ-นามสกุล ผู้ลงนาม"
+          style="text-align:center; border:none; border-bottom:1px dotted #333; width:280px; padding:4px;"> )
+      </div>
+      <input type="hidden" id="signatureData">
+    </div>
     <button class="primary" onclick="createJobOrder()">🚀 สร้างและส่งใบสั่งงาน</button>
     <div id="joResultLink"></div>
   </div>
-</div>
+  </div>
 
-<script>
-const token = localStorage.getItem('token');
-if (!token) window.location.href = '/login.html';
-document.getElementById('userName').innerText = '👤 ' + (localStorage.getItem('name') || '');
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login.html';
+    document.getElementById('userName').innerText = '👤 ' + (localStorage.getItem('name') || '');
 
-function normalizeArea(rai, ngan, wah) {
+    function normalizeArea(rai, ngan, wah) {
 
-  const totalWah = (rai * 400) + (ngan * 100) + wah;
+      const totalWah = (rai * 400) + (ngan * 100) + wah;
 
-  const newRai = Math.floor(totalWah / 400);
+      const newRai = Math.floor(totalWah / 400);
 
-  const remainder = totalWah % 400;
+      const remainder = totalWah % 400;
 
-  const newNgan = Math.floor(remainder / 100);
+      const newNgan = Math.floor(remainder / 100);
 
-  const newWah = remainder % 100;
+      const newWah = remainder % 100;
 
-  return { rai: newRai, ngan: newNgan, wah: newWah, totalWah: totalWah };
+      return { rai: newRai, ngan: newNgan, wah: newWah, totalWah: totalWah };
 
-}
-
-
-function calcArea(el) {
-  const row = el.closest('.work-item');
-  const raiInput = row.querySelector('.area-rai');
-  const nganInput = row.querySelector('.area-ngan');
-  const wahInput = row.querySelector('.area-wah');
-
-  const rai = parseFloat(raiInput.value) || 0;
-  const ngan = parseFloat(nganInput.value) || 0;
-  const wah = parseFloat(wahInput.value) || 0;
-
-  // ทดหน่วยอัตโนมัติ
-  const result = normalizeArea(rai, ngan, wah);
-  raiInput.value = result.rai;
-  nganInput.value = result.ngan;
-  wahInput.value = result.wah;
-
-  // รวมตารางวา
-  row.querySelector('.area-total').value = result.totalWah;
-
-  // แปลงเป็นตารางเมตร (ตร.วา x 4)
-  const sqm = result.totalWah * 4;
-  row.querySelector('.area-sqm').value = sqm;
-
-  // คำนวณเป็นเงิน (ตร.ม. x ราคาต่อหน่วย)
-  const price = parseFloat(row.querySelector('.unit-price').value) || 0;
-  row.querySelector('.row-amount').value = (sqm * price).toFixed(2);
-
-  updateGrandTotal();
-}
-
-function updateGrandTotal() {
-  let grandTotalWah = 0;
-  let grandTotalPrice = 0;
-
-  document.querySelectorAll('.work-item').forEach(row => {
-    grandTotalWah += parseFloat(row.querySelector('.area-total').value) || 0;
-    grandTotalPrice += parseFloat(row.querySelector('.row-amount').value) || 0;
-  });
-
-  const grandTotalSqm = grandTotalWah * 4;
-
-  document.getElementById('grand-total-area').innerText = grandTotalWah.toLocaleString();
-  document.getElementById('grand-total-sqm').innerText = grandTotalSqm.toLocaleString();
-  document.getElementById('grand-total-price').innerText = grandTotalPrice.toLocaleString(undefined, {minimumFractionDigits: 2});
-
-  const result = normalizeArea(0, 0, grandTotalWah);
-  document.getElementById('grand-total-rngw').innerText =
-    `${result.rai} ไร่ ${result.ngan} งาน ${result.wah} ตารางวา`;
-     updateSummaryTable(); 
-}
+    }
 
 
-function removeRow(btn) {
+    function calcArea(el) {
+      const row = el.closest('.work-item');
+      const raiInput = row.querySelector('.area-rai');
+      const nganInput = row.querySelector('.area-ngan');
+      const wahInput = row.querySelector('.area-wah');
 
-  btn.closest('.work-item').remove();
+      const rai = parseFloat(raiInput.value) || 0;
+      const ngan = parseFloat(nganInput.value) || 0;
+      const wah = parseFloat(wahInput.value) || 0;
 
-  updateGrandTotal();
+      // ทดหน่วยอัตโนมัติ
+      const result = normalizeArea(rai, ngan, wah);
+      raiInput.value = result.rai;
+      nganInput.value = result.ngan;
+      wahInput.value = result.wah;
 
-}
+      // รวมตารางวา
+      row.querySelector('.area-total').value = result.totalWah;
 
-// === สิ้นสุดโค้ดที่วาง ===
-function logout() {
-  localStorage.clear();
-  window.location.href = '/login.html';
-}
+      // แปลงเป็นตารางเมตร (ตร.วา x 4)
+      const sqm = result.totalWah * 4;
+      row.querySelector('.area-sqm').value = sqm;
 
-function showTab(name) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  event.target.classList.add('active');
-  if (name === 'joborders') loadJobOrders();
-  if (name === 'createjo') loadContractsForSelect();
-}
+      // คำนวณเป็นเงิน (ตร.ม. x ราคาต่อหน่วย)
+      const price = parseFloat(row.querySelector('.unit-price').value) || 0;
+      row.querySelector('.row-amount').value = (sqm * price).toFixed(2);
 
-async function apiFetch(url, options = {}) {
-  options.headers = { ...(options.headers||{}), 'Authorization': 'Bearer ' + token };
-  const res = await fetch(url, options);
-  if (res.status === 401) { logout(); return; }
-  return res;
-}
+      updateGrandTotal();
+    }
 
-// ---------- CONTRACTS ----------
-async function createContract() {
-  const body = {
-    contract_no: document.getElementById('c_no').value,
-    contractor_name: document.getElementById('c_name').value,
-    total_area: document.getElementById('c_area').value,
-    total_value: document.getElementById('c_value').value,
-    contractor_email: document.getElementById('c_email').value,
-    contractor_line_id: document.getElementById('c_line').value
-  };
-  const res = await apiFetch('/api/contracts', {
-    method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body)
-  });
-  if (res.ok) { alert('✅ บันทึกสัญญาสำเร็จ'); loadContracts(); document.querySelectorAll('#tab-contracts input').forEach(i=>i.value=''); }
-  else alert('❌ เกิดข้อผิดพลาด');
-}
+    function updateGrandTotal() {
+      let grandTotalWah = 0;
+      let grandTotalPrice = 0;
 
-async function loadContracts() {
-  const res = await apiFetch('/api/contracts');
-  const data = await res.json();
-  document.getElementById('contractTable').innerHTML = data.map(c => `
+      document.querySelectorAll('.work-item').forEach(row => {
+        grandTotalWah += parseFloat(row.querySelector('.area-total').value) || 0;
+        grandTotalPrice += parseFloat(row.querySelector('.row-amount').value) || 0;
+      });
+
+      const grandTotalSqm = grandTotalWah * 4;
+
+      document.getElementById('grand-total-area').innerText = grandTotalWah.toLocaleString();
+      document.getElementById('grand-total-sqm').innerText = grandTotalSqm.toLocaleString();
+      document.getElementById('grand-total-price').innerText = grandTotalPrice.toLocaleString(undefined, { minimumFractionDigits: 2 });
+
+      const result = normalizeArea(0, 0, grandTotalWah);
+      document.getElementById('grand-total-rngw').innerText =
+        `${result.rai} ไร่ ${result.ngan} งาน ${result.wah} ตารางวา`;
+      updateSummaryTable();
+    }
+
+
+    function removeRow(btn) {
+
+      btn.closest('.work-item').remove();
+
+      updateGrandTotal();
+
+    }
+
+    // === สิ้นสุดโค้ดที่วาง ===
+    function logout() {
+      localStorage.clear();
+      window.location.href = '/login.html';
+    }
+
+    function showTab(name) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+      event.target.classList.add('active');
+      if (name === 'joborders') loadJobOrders();
+      if (name === 'createjo') loadContractsForSelect();
+    }
+
+    async function apiFetch(url, options = {}) {
+      options.headers = { ...(options.headers || {}), 'Authorization': 'Bearer ' + token };
+      const res = await fetch(url, options);
+      if (res.status === 401) { logout(); return; }
+      return res;
+    }
+
+    // ---------- CONTRACTS ----------
+    async function createContract() {
+      const body = {
+        contract_no: document.getElementById('c_no').value,
+        contractor_name: document.getElementById('c_name').value,
+        total_area: document.getElementById('c_area').value,
+        total_value: document.getElementById('c_value').value,
+        contractor_email: document.getElementById('c_email').value,
+        contractor_line_id: document.getElementById('c_line').value
+      };
+      const res = await apiFetch('/api/contracts', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+      });
+      if (res.ok) { alert('✅ บันทึกสัญญาสำเร็จ'); loadContracts(); document.querySelectorAll('#tab-contracts input').forEach(i => i.value = ''); }
+      else alert('❌ เกิดข้อผิดพลาด');
+    }
+
+    async function loadContracts() {
+      const res = await apiFetch('/api/contracts');
+      const data = await res.json();
+      document.getElementById('contractTable').innerHTML = data.map(c => `
     <tr><td>${c.contract_no}</td><td>${c.contractor_name}</td><td>${c.total_area}</td><td>${c.total_value}</td></tr>
   `).join('');
-}
+    }
 
-async function loadContractsForSelect() {
-  const res = await apiFetch('/api/contracts');
-  const data = await res.json();
-  document.getElementById('jo_contract').innerHTML = data.map(c =>
-    `<option value="${c.id}">${c.contract_no} - ${c.contractor_name}</option>`).join('');
-}
+    async function loadContractsForSelect() {
+      const res = await apiFetch('/api/contracts');
+      const data = await res.json();
+      document.getElementById('jo_contract').innerHTML = data.map(c =>
+        `<option value="${c.id}">${c.contract_no} - ${c.contractor_name}</option>`).join('');
+    }
 
-// ---------- JOB ORDER ITEMS ----------
-let itemCount = 0;
-function addWorkRow() {
-  const container = document.getElementById('work-items-container');
-  const row = document.createElement('div');
-  row.className = 'work-item';
-  row.style.cssText = 'display:flex; gap:8px; align-items:end; margin-bottom:10px; flex-wrap:wrap;';
-  row.innerHTML = `
+    // ---------- JOB ORDER ITEMS ----------
+    let itemCount = 0;
+    function addWorkRow() {
+      const container = document.getElementById('work-items-container');
+      const row = document.createElement('div');
+      row.className = 'work-item';
+      row.style.cssText = 'display:flex; gap:8px; align-items:end; margin-bottom:10px; flex-wrap:wrap;';
+      row.innerHTML = `
     <div>
       <label style="font-size:12px; color:#666;">ประเภทงาน</label>
       <select class="work-type" onchange="onchange="onWorkTypeChange(this)" style="padding:8px; border:1px solid #ccc; border-radius:4px;">
@@ -457,75 +641,72 @@ function addWorkRow() {
     </div>
     <button type="button" style="background:#dc3545; color:white; border:none; padding:8px 12px; border-radius:4px;" onclick="removeRow(this)">ลบ</button>
   `;
-    container.appendChild(row);
-  applyContractRates();   // <<< เปลี่ยนบรรทัดนี้ ให้แถวใหม่ได้ราคาตามสัญญาทันที
-}
+      container.appendChild(row);
+      applyContractRates();   // <<< เปลี่ยนบรรทัดนี้ ให้แถวใหม่ได้ราคาตามสัญญาทันที
+    }
+    function calcTotal() {
+      let total = 0;
+      document.querySelectorAll('.item-area').forEach(el => total += Number(el.value || 0));
+      document.getElementById('totalAreaDisplay').innerText = total.toFixed(2);
+    }
 
-}
+    // ---------- CREATE JOB ORDER ----------
+    async function createJobOrder() {
+      const items = [];
+      document.querySelectorAll('.work-item').forEach(row => {
+        items.push({
+          work_type: row.querySelector('.work-type').value,
+          rai: row.querySelector('.area-rai').value,
+          ngan: row.querySelector('.area-ngan').value,
+          wah: row.querySelector('.area-wah').value,
+          total_wah: row.querySelector('.area-total').value,
+          total_sqm: row.querySelector('.area-sqm').value,
+          unit_price: row.querySelector('.unit-price').value,
+          amount: row.querySelector('.row-amount').value
+        });
+      });
 
-function calcTotal() {
-  let total = 0;
-  document.querySelectorAll('.item-area').forEach(el => total += Number(el.value || 0));
-  document.getElementById('totalAreaDisplay').innerText = total.toFixed(2);
-}
+      const body = {
+        contract_id: document.getElementById('jo_contract').value,
+        job_order_no: document.getElementById('jo_no').value,
+        issued_date: document.getElementById('jo_issued').value,
+        delivery_date: document.getElementById('jo_delivery').value,
+        survey_date: document.getElementById('jo_survey').value,
+        start_date: document.getElementById('jo_start').value,
+        duration_days: document.getElementById('jo_duration').value,
+        prepared_by: document.getElementById('jo_prepared').value,
+        department: document.getElementById('jo_dept').value,
+        work_detail: document.getElementById('jo_detail').value,
+        workers: document.getElementById('jo_workers').value,
+        equipment: document.getElementById('jo_equipment').value,
+        area_restriction: document.getElementById('jo_restrict').value,
+        safety_condition: document.getElementById('jo_safety').value,
+        waste_management: document.getElementById('jo_waste').value,
+        total_area: document.getElementById('totalAreaDisplay').innerText,
+        items
+      };
 
-// ---------- CREATE JOB ORDER ----------
-async function createJobOrder() {
-  const items = [];
-  document.querySelectorAll('.work-item').forEach(row => {
-  items.push({
-    work_type: row.querySelector('.work-type').value,
-    rai: row.querySelector('.area-rai').value,
-    ngan: row.querySelector('.area-ngan').value,
-    wah: row.querySelector('.area-wah').value,
-    total_wah: row.querySelector('.area-total').value,
-    total_sqm: row.querySelector('.area-sqm').value,
-    unit_price: row.querySelector('.unit-price').value,
-    amount: row.querySelector('.row-amount').value
-  });
-});
-
-  const body = {
-    contract_id: document.getElementById('jo_contract').value,
-    job_order_no: document.getElementById('jo_no').value,
-    issued_date: document.getElementById('jo_issued').value,
-    delivery_date: document.getElementById('jo_delivery').value,
-    survey_date: document.getElementById('jo_survey').value,
-    start_date: document.getElementById('jo_start').value,
-    duration_days: document.getElementById('jo_duration').value,
-    prepared_by: document.getElementById('jo_prepared').value,
-    department: document.getElementById('jo_dept').value,
-    work_detail: document.getElementById('jo_detail').value,
-    workers: document.getElementById('jo_workers').value,
-    equipment: document.getElementById('jo_equipment').value,
-    area_restriction: document.getElementById('jo_restrict').value,
-    safety_condition: document.getElementById('jo_safety').value,
-    waste_management: document.getElementById('jo_waste').value,
-    total_area: document.getElementById('totalAreaDisplay').innerText,
-    items
-  };
-
-  const res = await apiFetch('/api/job-orders', {
-    method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body)
-  });
-  const data = await res.json();
-  if (res.ok) {
-    const fullLink = window.location.origin + data.contractor_link;
-    document.getElementById('joResultLink').innerHTML = `
+      const res = await apiFetch('/api/job-orders', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const fullLink = window.location.origin + data.contractor_link;
+        document.getElementById('joResultLink').innerHTML = `
       <div class="link-box">
         ✅ สร้างใบสั่งงานสำเร็จ! ลิงก์สำหรับผู้รับจ้าง:<br>
         <a href="${fullLink}" target="_blank">${fullLink}</a>
       </div>`;
-  } else {
-    alert('❌ เกิดข้อผิดพลาดในการสร้างใบสั่งงาน');
-  }
-}
+      } else {
+        alert('❌ เกิดข้อผิดพลาดในการสร้างใบสั่งงาน');
+      }
+    }
 
-// ---------- JOB ORDERS LIST ----------
-async function loadJobOrders() {
-  const res = await apiFetch('/api/job-orders');
-  const data = await res.json();
-  document.getElementById('jobOrderTable').innerHTML = data.map(jo => `
+    // ---------- JOB ORDERS LIST ----------
+    async function loadJobOrders() {
+      const res = await apiFetch('/api/job-orders');
+      const data = await res.json();
+      document.getElementById('jobOrderTable').innerHTML = data.map(jo => `
     <tr>
       <td>${jo.job_order_no}</td>
       <td>${jo.issued_date || '-'}</td>
@@ -533,132 +714,133 @@ async function loadJobOrders() {
       <td><a href="/contractor.html?token=${jo.access_token}" target="_blank">🔗 เปิดดู</a></td>
     </tr>
   `).join('');
-}
-// === คำนวณตารางสรุปส่วนที่ 2 ===
-function updateSummaryTable() {
-  // 1) รวมปริมาณ ตร.ม. ของใบสั่งงานครั้งนี้ แยกตามประเภทงาน
-  const currentQty = { 'งานเบา': 0, 'งานกลาง': 0, 'งานหนัก': 0 };
-  document.querySelectorAll('.work-item').forEach(row => {
-    const type = row.querySelector('.work-type').value;
-    const sqm = parseFloat(row.querySelector('.area-sqm').value) || 0;
-    if (currentQty.hasOwnProperty(type)) currentQty[type] += sqm;
-  });
+    }
+    // === คำนวณตารางสรุปส่วนที่ 2 ===
+    function updateSummaryTable() {
+      // 1) รวมปริมาณ ตร.ม. ของใบสั่งงานครั้งนี้ แยกตามประเภทงาน
+      const currentQty = { 'งานเบา': 0, 'งานกลาง': 0, 'งานหนัก': 0 };
+      document.querySelectorAll('.work-item').forEach(row => {
+        const type = row.querySelector('.work-type').value;
+        const sqm = parseFloat(row.querySelector('.area-sqm').value) || 0;
+        if (currentQty.hasOwnProperty(type)) currentQty[type] += sqm;
+      });
 
-  let grandAmount = 0, grandRemainAmount = 0;
+      let grandAmount = 0, grandRemainAmount = 0;
 
-  document.querySelectorAll('#summaryTable tbody tr[data-type]').forEach(tr => {
-    const type = tr.dataset.type;
-    const contract = parseFloat(tr.querySelector('.sum-contract').value) || 0;
-    const before = parseFloat(tr.querySelector('.sum-before').value) || 0;
-    const rate = parseFloat(tr.querySelector('.sum-rate').value) || 0;
-    const thisTime = currentQty[type] || 0;
+      document.querySelectorAll('#summaryTable tbody tr[data-type]').forEach(tr => {
+        const type = tr.dataset.type;
+        const contract = parseFloat(tr.querySelector('.sum-contract').value) || 0;
+        const before = parseFloat(tr.querySelector('.sum-before').value) || 0;
+        const rate = parseFloat(tr.querySelector('.sum-rate').value) || 0;
+        const thisTime = currentQty[type] || 0;
 
-    const after = before + thisTime;      // สะสมหลังออกใบสั่งงาน
-    const remain = contract - after;      // ปริมาณคงเหลือ
-    const amount = thisTime * rate;       // วงเงินครั้งนี้
-    const remainAmount = remain * rate;   // วงเงินคงเหลือ
+        const after = before + thisTime;      // สะสมหลังออกใบสั่งงาน
+        const remain = contract - after;      // ปริมาณคงเหลือ
+        const amount = thisTime * rate;       // วงเงินครั้งนี้
+        const remainAmount = remain * rate;   // วงเงินคงเหลือ
 
-    tr.querySelector('.sum-after').innerText = after.toLocaleString();
-    tr.querySelector('.sum-remain').innerText = remain.toLocaleString();
-    tr.querySelector('.sum-amount').innerText = amount.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
-    tr.querySelector('.sum-remain-amount').innerText = remainAmount.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+        tr.querySelector('.sum-after').innerText = after.toLocaleString();
+        tr.querySelector('.sum-remain').innerText = remain.toLocaleString();
+        tr.querySelector('.sum-amount').innerText = amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        tr.querySelector('.sum-remain-amount').innerText = remainAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    // เตือนด้วยสีแดงหากเบิกเกินปริมาณตามสัญญา
-    tr.querySelector('.sum-remain').style.color = remain < 0 ? '#c0392b' : '#000';
+        // เตือนด้วยสีแดงหากเบิกเกินปริมาณตามสัญญา
+        tr.querySelector('.sum-remain').style.color = remain < 0 ? '#c0392b' : '#000';
 
-    grandAmount += amount;
-    grandRemainAmount += remainAmount;
-  });
+        grandAmount += amount;
+        grandRemainAmount += remainAmount;
+      });
 
-  document.getElementById('sumGrandAmount').innerText = grandAmount.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
-  document.getElementById('sumGrandRemain').innerText = grandRemainAmount.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
-}
+      document.getElementById('sumGrandAmount').innerText = grandAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('sumGrandRemain').innerText = grandRemainAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
 
-// === ระบบลายเซ็น (รองรับทั้งเมาส์และนิ้วบนมือถือ) ===
-(function initSignature() {
-  const canvas = document.getElementById('sigPad');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  ctx.lineWidth = 2;
-  ctx.lineCap = 'round';
-  ctx.strokeStyle = '#000';
-  let drawing = false;
+    // === ระบบลายเซ็น (รองรับทั้งเมาส์และนิ้วบนมือถือ) ===
+    (function initSignature() {
+      const canvas = document.getElementById('sigPad');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#000';
+      let drawing = false;
 
-  function getPos(e) {
-    const rect = canvas.getBoundingClientRect();
-    const touch = e.touches ? e.touches[0] : e;
-    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
-  }
-  function start(e) { e.preventDefault(); drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
-  function move(e) { if (!drawing) return; e.preventDefault(); const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }
-  function end() {
-    if (!drawing) return;
-    drawing = false;
-    document.getElementById('signatureData').value = canvas.toDataURL('image/png');
-  }
+      function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches ? e.touches[0] : e;
+        return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+      }
+      function start(e) { e.preventDefault(); drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }
+      function move(e) { if (!drawing) return; e.preventDefault(); const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }
+      function end() {
+        if (!drawing) return;
+        drawing = false;
+        document.getElementById('signatureData').value = canvas.toDataURL('image/png');
+      }
 
-  canvas.addEventListener('mousedown', start);
-  canvas.addEventListener('mousemove', move);
-  canvas.addEventListener('mouseup', end);
-  canvas.addEventListener('mouseleave', end);
-  canvas.addEventListener('touchstart', start, {passive:false});
-  canvas.addEventListener('touchmove', move, {passive:false});
-  canvas.addEventListener('touchend', end);
-})();
+      canvas.addEventListener('mousedown', start);
+      canvas.addEventListener('mousemove', move);
+      canvas.addEventListener('mouseup', end);
+      canvas.addEventListener('mouseleave', end);
+      canvas.addEventListener('touchstart', start, { passive: false });
+      canvas.addEventListener('touchmove', move, { passive: false });
+      canvas.addEventListener('touchend', end);
+    })();
 
-function clearSignature() {
-  const canvas = document.getElementById('sigPad');
-  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-  document.getElementById('signatureData').value = '';
-}
-// === ดึงราคาต่อหน่วยตามประเภทงาน ===
-function getContractRate(type) {
-  if (type === 'งานเบา')  return parseFloat(document.getElementById('rate-light').value)  || 0;
-  if (type === 'งานกลาง') return parseFloat(document.getElementById('rate-medium').value) || 0;
-  if (type === 'งานหนัก') return parseFloat(document.getElementById('rate-heavy').value)  || 0;
-  return 0;
-}
+    function clearSignature() {
+      const canvas = document.getElementById('sigPad');
+      canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+      document.getElementById('signatureData').value = '';
+    }
+    // === ดึงราคาต่อหน่วยตามประเภทงาน ===
+    function getContractRate(type) {
+      if (type === 'งานเบา') return parseFloat(document.getElementById('rate-light').value) || 0;
+      if (type === 'งานกลาง') return parseFloat(document.getElementById('rate-medium').value) || 0;
+      if (type === 'งานหนัก') return parseFloat(document.getElementById('rate-heavy').value) || 0;
+      return 0;
+    }
 
-// === กระจายราคาไปทุกจุดในระบบ ===
-function applyContractRates() {
-  // 2.1 เติมราคาลงทุกแถวในตารางรายการงาน
-  document.querySelectorAll('.work-item').forEach(row => {
-    const type = row.querySelector('.work-type').value;
-    row.querySelector('.unit-price').value = getContractRate(type).toFixed(2);
-  });
+    // === กระจายราคาไปทุกจุดในระบบ ===
+    function applyContractRates() {
+      // 2.1 เติมราคาลงทุกแถวในตารางรายการงาน
+      document.querySelectorAll('.work-item').forEach(row => {
+        const type = row.querySelector('.work-type').value;
+        row.querySelector('.unit-price').value = getContractRate(type).toFixed(2);
+      });
 
-  // 2.2 เติมราคาลงตารางสรุปส่วนที่ 2
-  document.querySelectorAll('#summaryTable tbody tr[data-type]').forEach(tr => {
-    tr.querySelector('.sum-rate').value = getContractRate(tr.dataset.type).toFixed(2);
-  });
+      // 2.2 เติมราคาลงตารางสรุปส่วนที่ 2
+      document.querySelectorAll('#summaryTable tbody tr[data-type]').forEach(tr => {
+        tr.querySelector('.sum-rate').value = getContractRate(tr.dataset.type).toFixed(2);
+      });
 
-  // 2.3 คำนวณเงินใหม่ทุกแถว
-  recalcAllRows();
-}
+      // 2.3 คำนวณเงินใหม่ทุกแถว
+      recalcAllRows();
+    }
 
-// === คำนวณใหม่ทุกแถว ===
-function recalcAllRows() {
-  document.querySelectorAll('.work-item').forEach(row => {
-    const totalWah = parseFloat(row.querySelector('.area-total').value) || 0;
-    const sqm = totalWah * 4;
-    const price = parseFloat(row.querySelector('.unit-price').value) || 0;
-    row.querySelector('.area-sqm').value = sqm;
-    row.querySelector('.row-amount').value = (sqm * price).toFixed(2);
-  });
-  updateGrandTotal();
-}
+    // === คำนวณใหม่ทุกแถว ===
+    function recalcAllRows() {
+      document.querySelectorAll('.work-item').forEach(row => {
+        const totalWah = parseFloat(row.querySelector('.area-total').value) || 0;
+        const sqm = totalWah * 4;
+        const price = parseFloat(row.querySelector('.unit-price').value) || 0;
+        row.querySelector('.area-sqm').value = sqm;
+        row.querySelector('.row-amount').value = (sqm * price).toFixed(2);
+      });
+      updateGrandTotal();
+    }
 
-// === เมื่อผู้ใช้เปลี่ยนประเภทงานในแถวใดแถวหนึ่ง ===
-function onWorkTypeChange(el) {
-  const row = el.closest('.work-item');
-  row.querySelector('.unit-price').value = getContractRate(el.value).toFixed(2);
-  calcArea(el);
-}
-// เริ่มต้นโหลดข้อมูล
-loadContracts();
-addItemRow();
-// เติมราคาตามสัญญาทันทีที่โหลดหน้าเว็บเสร็จ
-window.addEventListener('load', applyContractRates);
-</script>
+    // === เมื่อผู้ใช้เปลี่ยนประเภทงานในแถวใดแถวหนึ่ง ===
+    function onWorkTypeChange(el) {
+      const row = el.closest('.work-item');
+      row.querySelector('.unit-price').value = getContractRate(el.value).toFixed(2);
+      calcArea(el);
+    }
+    // เริ่มต้นโหลดข้อมูล
+    loadContracts();
+    addItemRow();
+    // เติมราคาตามสัญญาทันทีที่โหลดหน้าเว็บเสร็จ
+    window.addEventListener('load', applyContractRates);
+  </script>
 </body>
+
 </html>
