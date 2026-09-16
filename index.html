@@ -387,7 +387,7 @@
       <div
         style="margin-top:15px; padding:12px; background:#e8f4fd; border-radius:6px; line-height:1.9; margin-bottom:15px;">
         <strong>สรุปพื้นที่รวมใบสั่งงานนี้:</strong><br>
-        <span id="grand-total-rngw" style="color:#0b5394; font-weight:bold;"><span id="totalAreaDisplay">0 ไร่ 0 งาน 0 ตารางวา</span></span>
+        <span id="grand-total-rngw" style="color:#0b5394; font-weight:bold;">0 ไร่ 0 งาน 0 ตารางวา</span><br>
         รวม: <span id="grand-total-area" style="font-weight:bold;">0</span> ตารางวา
         &nbsp;|&nbsp;
         คิดเป็น: <span id="grand-total-sqm" style="font-weight:bold; color:#b8860b;">0</span> ตารางเมตร<br>
@@ -407,6 +407,7 @@
             <th style="border:1px solid #333; padding:6px;">ปริมาณงาน<br>คงเหลือ (ตร.ม.)</th>
             <th style="border:1px solid #333; padding:6px;">วงเงินต่อหน่วย<br>ตามสัญญา</th>
             <th style="border:1px solid #333; padding:6px;">วงเงินตามใบสั่งงาน<br>ครั้งนี้เป็นเงิน</th>
+            <th style="border:1px solid #333; padding:6px;">งบประมาณ<br>เริ่มต้น</th>
             <th style="border:1px solid #333; padding:6px;">วงเงิน<br>คงเหลือ</th>
           </tr>
         </thead>
@@ -424,6 +425,7 @@
                 style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()">
             </td>
             <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-amount">0.00</td>
+            <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-budget-start">0.00</td>
             <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain-amount">0.00</td>
           </tr>
           <tr data-type="งานกลาง">
@@ -439,6 +441,7 @@
                 style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()">
             </td>
             <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-amount">0.00</td>
+            <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-budget-start">0.00</td>
             <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain-amount">0.00</td>
           </tr>
           <tr data-type="งานหนัก">
@@ -454,10 +457,11 @@
                 style="width:100%; border:none; text-align:right; background:#fdf2ec;" onchange="updateSummaryTable()">
             </td>
             <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-amount">0.00</td>
+            <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-budget-start">0.00</td>
             <td style="border:1px solid #333; padding:6px; text-align:right;" class="sum-remain-amount">0.00</td>
           </tr>
           <tr style="background:#f7f7f7; font-weight:bold;">
-            <td colspan="6" style="border:1px solid #333; padding:8px; text-align:right;">จำนวนเงินรวมทั้งสิ้น</td>
+            <td colspan="7" style="border:1px solid #333; padding:8px; text-align:right;">จำนวนเงินรวมทั้งสิ้น</td>
             <td style="border:1px solid #333; padding:6px; text-align:right;" id="sumGrandAmount">0.00</td>
             <td style="border:1px solid #333; padding:6px; text-align:right;" id="sumGrandRemain">0.00</td>
           </tr>
@@ -709,7 +713,7 @@
         area_restriction: document.getElementById('jo_restrict').value,
         safety_condition: document.getElementById('jo_safety').value,
         waste_management: document.getElementById('jo_waste').value,
-        total_area: document.getElementById('totalAreaDisplay').innerText,
+        total_area: document.getElementById('totalAreaDisplay')?.innerText || '0',
         items
       };
 
@@ -792,8 +796,27 @@ document.querySelectorAll('#summaryTable tbody tr[data-type]').forEach(tr => {
     if (type === 'งานหนัก') startBudget = document.getElementById('budget-start-heavy').value;
 
     // นำไปใส่ในตารางสรุปอัตโนมัติ
-    tr.querySelector('.sum-budget-start').value = startBudget;
-    
+    document.querySelectorAll('#summaryTable tbody tr[data-type]').forEach(tr => {
+    const type = tr.dataset.type;
+
+    // ดึงค่าจากช่องงบเริ่มต้น (กัน null ด้วย optional chaining)
+    let startBudget = 0;
+    if (type === 'งานเบา')  startBudget = Number(document.getElementById('budget-start-light')?.value  || 0);
+    if (type === 'งานกลาง') startBudget = Number(document.getElementById('budget-start-medium')?.value || 0);
+    if (type === 'งานหนัก') startBudget = Number(document.getElementById('budget-start-heavy')?.value  || 0);
+
+    // ✅ เช็กก่อนว่าเจอช่องไหม แล้วค่อยใส่ค่า
+    const cell = tr.querySelector('.sum-budget-start');
+    if (cell) {
+        if (cell.tagName === 'INPUT' || cell.tagName === 'TEXTAREA') {
+            cell.value = startBudget;
+        } else {
+            cell.innerText = startBudget.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+    } else {
+        console.warn(`⚠️ แถว "${type}" ไม่มี element class="sum-budget-start"`);
+    }
+
     // ... คำนวณยอดคงเหลือต่อ ...
 });
     }
