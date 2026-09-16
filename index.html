@@ -787,9 +787,9 @@
 
     // นำไปใส่ในตารางสรุปอัตโนมัติ
 
-    const type = tr.dataset.type;
+         const type = tr.dataset.type;
 
-    // ดึงค่าจากช่องงบเริ่มต้น (กัน null ด้วย optional chaining)
+        // ดึงค่าจากช่องงบเริ่มต้น (กัน null ด้วย optional chaining)
     let startBudget = 0;
     if (type === 'งานเบา')  startBudget = Number(document.getElementById('budget-start-light')?.value  || 0);
     if (type === 'งานกลาง') startBudget = Number(document.getElementById('budget-start-medium')?.value || 0);
@@ -808,7 +808,7 @@
     }
 
     // ... คำนวณยอดคงเหลือต่อ ...
-});
+    {;
     }
 
     // === ระบบลายเซ็น (รองรับทั้งเมาส์และนิ้วบนมือถือ) ===
