@@ -755,7 +755,7 @@
         const sqm = parseFloat(row.querySelector('.area-sqm').value) || 0;
         if (currentQty.hasOwnProperty(type)) currentQty[type] += sqm;
       });
-
+    }
       let grandAmount = 0, grandRemainAmount = 0;
 
       document.querySelectorAll('#summaryTable tbody tr[data-type]').forEach(tr => {
