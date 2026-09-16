@@ -785,18 +785,8 @@
       document.getElementById('sumGrandAmount').innerText = grandAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       document.getElementById('sumGrandRemain').innerText = grandRemainAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-      // ในฟังก์ชัน updateSummaryTable ให้เพิ่มส่วนนี้เข้าไป
-document.querySelectorAll('#summaryTable tbody tr[data-type]').forEach(tr => {
-    const type = tr.dataset.type;
-    
-    // ดึงค่าจากช่องงบเริ่มต้นที่เราเพิ่งสร้าง
-    let startBudget = 0;
-    if (type === 'งานเบา') startBudget = document.getElementById('budget-start-light').value;
-    if (type === 'งานกลาง') startBudget = document.getElementById('budget-start-medium').value;
-    if (type === 'งานหนัก') startBudget = document.getElementById('budget-start-heavy').value;
-
     // นำไปใส่ในตารางสรุปอัตโนมัติ
-    document.querySelectorAll('#summaryTable tbody tr[data-type]').forEach(tr => {
+
     const type = tr.dataset.type;
 
     // ดึงค่าจากช่องงบเริ่มต้น (กัน null ด้วย optional chaining)
