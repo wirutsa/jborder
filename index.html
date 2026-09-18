@@ -747,39 +747,70 @@
   `).join('');
     }
     // === คำนวณตารางสรุปส่วนที่ 2 ===
-    function updateSummaryTable() {
-      // 1) รวมปริมาณ ตร.ม. ของใบสั่งงานครั้งนี้ แยกตามประเภทงาน
-      const currentQty = { 'งานเบา': 0, 'งานกลาง': 0, 'งานหนัก': 0 };
-      document.querySelectorAll('.work-item').forEach(row => {
-        const type = row.querySelector('.work-type').value;
-        const sqm = parseFloat(row.querySelector('.area-sqm').value) || 0;
-        if (currentQty.hasOwnProperty(type)) currentQty[type] += sqm;
-      });
-    }
-      let grandAmount = 0, grandRemainAmount = 0;
+    // === ตัวช่วย: ใส่ค่าลง cell (รองรับทั้ง <input> และ <td>) ===
+function setCell(tr, selector, value) {
+    const el = tr.querySelector(selector);
+    if (!el) return;
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.value = value;
+    else el.innerText = value;
+}
 
-      document.querySelectorAll('#summaryTable tbody tr[data-type]').forEach(tr => {
-        const type = tr.dataset.type;
-        const contract = parseFloat(tr.querySelector('.sum-contract').value) || 0;
-        const before = parseFloat(tr.querySelector('.sum-before').value) || 0;
-        const rate = parseFloat(tr.querySelector('.sum-rate').value) || 0;
+// === ตัวช่วย: จัดรูปแบบตัวเลข 2 ตำแหน่ง ===
+function fmt2(n) {
+    return (Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function updateSummaryTable() {
+    // 1) รวมปริมาณ ตร.ม. ของใบสั่งงานครั้งนี้ แยกตามประเภทงาน
+    const currentQty = { 'งานเบา': 0, 'งานกลาง': 0, 'งานหนัก': 0 };
+    document.querySelectorAll('.work-item').forEach(row => {
+        const type = row.querySelector('.work-type')?.value;
+        const sqm  = parseFloat(row.querySelector('.area-sqm')?.value) || 0;
+        if (currentQty.hasOwnProperty(type)) currentQty[type] += sqm;
+    });
+    // ⚠️ ห้ามมี } ตรงนี้ — ฟังก์ชันต้องทำงานต่อ
+
+    let grandAmount = 0, grandRemainAmount = 0;
+
+    // 2) คำนวณทีละแถวในตารางสรุป
+    document.querySelectorAll('#summaryTable tbody tr[data-type]').forEach(tr => {
+        const type     = tr.dataset.type;
+        const contract = parseFloat(tr.querySelector('.sum-contract')?.value) || 0;
+        const before   = parseFloat(tr.querySelector('.sum-before')?.value) || 0;
+        const rate     = parseFloat(tr.querySelector('.sum-rate')?.value) || 0;
         const thisTime = currentQty[type] || 0;
 
-        const after = before + thisTime;      // สะสมหลังออกใบสั่งงาน
-        const remain = contract - after;      // ปริมาณคงเหลือ
-        const amount = thisTime * rate;       // วงเงินครั้งนี้
-        const remainAmount = remain * rate;   // วงเงินคงเหลือ
+        const after        = before + thisTime;    // สะสมหลังออกใบสั่งงาน
+        const remain       = contract - after;     // ปริมาณคงเหลือ
+        const amount       = thisTime * rate;      // วงเงินครั้งนี้
+        const remainAmount = remain * rate;        // วงเงินคงเหลือ
 
-        tr.querySelector('.sum-after').innerText = after.toLocaleString();
-        tr.querySelector('.sum-amount').innerText = amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        tr.querySelector('.sum-remain-amount').innerText = remainAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        // งบประมาณเริ่มต้นตามประเภทงาน
+        let startBudget = 0;
+        if (type === 'งานเบา')  startBudget = Number(document.getElementById('budget-start-light')?.value  || 0);
+        if (type === 'งานกลาง') startBudget = Number(document.getElementById('budget-start-medium')?.value || 0);
+        if (type === 'งานหนัก') startBudget = Number(document.getElementById('budget-start-heavy')?.value  || 0);
 
+        setCell(tr, '.sum-after',         after.toLocaleString());
+        setCell(tr, '.sum-remain',        remain.toLocaleString());
+        setCell(tr, '.sum-amount',        fmt2(amount));
+        setCell(tr, '.sum-remain-amount', fmt2(remainAmount));
+        setCell(tr, '.sum-budget-start',  fmt2(startBudget));
 
         // เตือนด้วยสีแดงหากเบิกเกินปริมาณตามสัญญา
-        tr.querySelector('.sum-remain').style.color = remain < 0 ? '#c0392b' : '#000';
+        const remainCell = tr.querySelector('.sum-remain');
+        if (remainCell) remainCell.style.color = remain < 0 ? '#c0392b' : '#000';
 
-        grandAmount += amount;
+        grandAmount       += amount;
         grandRemainAmount += remainAmount;
+    });
+
+    // 3) ยอดรวมท้ายตาราง
+    const gA = document.getElementById('sumGrandAmount');
+    const gR = document.getElementById('sumGrandRemain');
+    if (gA) gA.innerText = fmt2(grandAmount);
+    if (gR) gR.innerText = fmt2(grandRemainAmount);
+}
       });
 
       document.getElementById('sumGrandAmount').innerText = grandAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
