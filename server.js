@@ -29,7 +29,7 @@ function toNum(v) {
 
 app.post('/api/job-orders', async (req, res) => {
     try {
-        console.log('📥 Payload:', JSON.stringify(req.body).slice(0, 500));
+        console.log('📥 Payload:', req.body ? JSON.stringify(req.body).slice(0, 500) : 'Body is empty');
 
         const b = req.body;
 
