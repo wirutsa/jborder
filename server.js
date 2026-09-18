@@ -1,3 +1,49 @@
+// === แปลงเป็นจำนวนเต็ม (ตัดคอมม่า/ข้อความออก) ===
+function toInt(v) {
+    if (v === null || v === undefined || v === '') return 0;
+    const n = parseInt(String(v).replace(/,/g, '').replace(/[^\d.-]/g, ''), 10);
+    return Number.isFinite(n) ? n : 0;
+}
+
+// === แปลงเป็นทศนิยม (สำหรับคอลัมน์เงิน NUMERIC/DECIMAL) ===
+function toNum(v) {
+    if (v === null || v === undefined || v === '') return 0;
+    const n = parseFloat(String(v).replace(/,/g, '').replace(/[^\d.-]/g, ''));
+    return Number.isFinite(n) ? n : 0;
+}
+
+app.post('/api/job-orders', async (req, res) => {
+    try {
+        console.log('📥 Payload:', JSON.stringify(req.body).slice(0, 500));
+
+        const b = req.body;
+
+        const result = await pool.query(
+            `INSERT INTO job_orders (contract_id, total_area, total_amount, qty_light, qty_medium, qty_heavy, signature, signer_name)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+            [
+                toInt(b.contract_id),      // ✅ ผ่านตัวแปลงทุกตัว
+                toNum(b.total_area),
+                toNum(b.total_amount),
+                toNum(b.qty_light),
+                toNum(b.qty_medium),
+                toNum(b.qty_heavy),
+                b.signature || null,       // base64 เก็บเป็น TEXT ไม่ต้องแปลง
+                b.signer_name || ''
+            ]
+        );
+
+        res.json({ success: true, id: result.rows[0].id });
+    } catch (err) {
+        console.error('❌ INSERT ล้มเหลว:', err.message);
+        console.error('   detail:', err.detail);
+        res.status(500).json({ success: false, message: err.message });   // ✅ ส่ง 500 แทนที่จะให้แอปตาย
+    }
+});
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
 require('dotenv').config();
 const express = require('express');
 const jwt = require('jsonwebtoken');
@@ -138,3 +184,4 @@ app.post('/api/job-orders/:id/photos', upload.array('photos', 20), async (req, r
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log('🚀 EECO Job Order System กำลังทำงานที่ port ' + PORT));
+
