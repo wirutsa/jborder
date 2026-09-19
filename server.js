@@ -27,11 +27,24 @@ function toNum(v) {
     return Number.isFinite(n) ? n : 0;
 }
 
+// ========== Middleware (ต้องมาก่อน routes เสมอ) ==========
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
+// ========== Routes ==========
 app.post('/api/job-orders', async (req, res) => {
     try {
-        console.log('📥 Payload:', req.body ? JSON.stringify(req.body).slice(0, 500) : 'Body is empty');
+        // 🛡️ Guard Clause: ตรวจ body ก่อนทำอะไรทั้งสิ้น
+        if (!req.body || Object.keys(req.body).length === 0) {
+            console.error('❌ req.body ว่าง — เช็กลำดับ express.json() หรือ Content-Type ฝั่ง client');
+            return res.status(400).json({
+                success: false,
+                message: 'ไม่ได้รับข้อมูล (req.body ว่าง) กรุณาตรวจสอบ Content-Type'
+            });
+        }
 
         const b = req.body;
+        console.log('📥 Payload keys:', Object.keys(b).join(', '));
 
         const result = await pool.query(
             `INSERT INTO job_orders (contract_id, total_area, total_amount, qty_light, qty_medium, qty_heavy, signature, signer_name)
@@ -49,16 +62,13 @@ app.post('/api/job-orders', async (req, res) => {
         );
 
         res.json({ success: true, id: result.rows[0].id });
+
     } catch (err) {
         console.error('❌ INSERT ล้มเหลว:', err.message);
         console.error('   detail:', err.detail);
-        res.status(500).json({ success: false, message: err.message });   // ✅ ส่ง 500 แทนที่จะให้แอปตาย
+        res.status(500).json({ success: false, message: err.message });
     }
 });
-
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
-
 
 const SECRET = process.env.JWT_SECRET || 'eeco-secret';
 

@@ -585,12 +585,19 @@
       if (name === 'createjo') loadContractsForSelect();
     }
 
-    async function apiFetch(url, options = {}) {
-      options.headers = { ...(options.headers || {}), 'Authorization': 'Bearer ' + token };
-      const res = await fetch(url, options);
-      if (res.status === 401) { logout(); return; }
-      return res;
+ async function apiFetch(url, options = {}) {
+    const headers = { ...(options.headers || {}) };
+    headers['Authorization'] = 'Bearer ' + token;
+
+    // ✅ ถ้ามี body และยังไม่ได้ระบุ Content-Type → ใส่ให้อัตโนมัติ
+    if (options.body && !headers['Content-Type'] && !(options.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
     }
+
+    const res = await fetch(url, { ...options, headers });
+    if (res.status === 401) { logout(); return; }
+    return res;
+}
 
     // ---------- CONTRACTS ----------
     async function createContract() {
@@ -827,7 +834,6 @@ function updateSummaryTable() {
     if (type === 'งานหนัก') startBudget = Number(document.getElementById('budget-start-heavy')?.value  || 0);
 
     // ✅ เช็กก่อนว่าเจอช่องไหม แล้วค่อยใส่ค่า
-    const cell = tr.querySelector('.sum-budget-start');
     if (cell) {
         if (cell.tagName === 'INPUT' || cell.tagName === 'TEXTAREA') {
             cell.value = startBudget;
