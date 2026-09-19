@@ -698,55 +698,86 @@ let globalItems = [];
     }
 
     // ---------- CREATE JOB ORDER ----------
-   async function createJobOrder() {
-    const items = globalItems;
+   // 1. เพิ่ม showTab ที่หายไป
 
-    if (!items || items.length === 0) {
-        alert("ยังไม่มีรายการงาน!");
-        return;
-    }
+function showTab(tabName) {
 
-    // --- ย้าย body มาไว้ตรงนี้ ---
-    const body = {
-        contract_id: document.getElementById('jo_contract')?.value,
-        items: items 
-        // เพิ่ม field อื่นๆ ที่คุณต้องส่งด้วยนะครับ
-    };
+    document.querySelectorAll('.tab-content').forEach(tab => {
 
-    // --- ย้ายส่วนส่ง fetch มาไว้ตรงนี้ (ในฟังก์ชัน) ---
-    const res = await apiFetch('/api/job-orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        tab.style.display = 'none';
+
     });
 
-    const data = await res.json();
-    if (res.ok) {
-        alert("สร้างใบสั่งงานสำเร็จ!");
-        // เพิ่มโค้ดโหลดรายการใหม่ตรงนี้
-    } else {
-        alert('เกิดข้อผิดพลาดในการสร้างใบสั่งงาน');
-    }
- // <--- จบฟังก์ชันที่นี่ปีกกาปิดตรงนี้
+    document.getElementById(tabName).style.display = 'block';
 
-      const data = await res.json();
-              if (res.ok) {
-            const fullLink = window.location.origin + data.contractor_link;
-            document.getElementById('joResultLink').innerHTML = `
+}
+
+
+// 2. ฟังก์ชันที่ถูกต้อง (รวมโค้ดให้สะอาด ไม่มี data ซ้ำ)
+
+async function createJobOrder() {
+
+    const items = typeof globalItems !== 'undefined' ? globalItems : [];
+
+    
+
+    if (items.length === 0) {
+
+        alert("ยังไม่มีรายการงาน!");
+
+        return;
+
+    }
+
+
+    const body = {
+
+        contract_id: document.getElementById('jo_contract')?.value,
+
+        items: items
+
+    };
+
+
+    const res = await apiFetch('/api/job-orders', {
+
+        method: 'POST',
+
+        headers: { 'Content-Type': 'application/json' },
+
+        body: JSON.stringify(body)
+
+    });
+
+
+    const data = await res.json(); // ประกาศ data ครั้งเดียวที่นี่
+
+    
+
+    if (res.ok) {
+
+        const fullLink = window.location.origin + data.contractor_link;
+
+        document.getElementById('joResultLink').innerHTML = `
+
             <div class="link-box">
+
             ✅ สร้างใบสั่งงานสำเร็จ! ลิงก์สำหรับผู้รับจ้าง:<br>
+
             <a href="${fullLink}" target="_blank">${fullLink}</a>
+
             </div>`;
-            
-            // ✅ เพิ่ม Delay 1 วินาที เพื่อให้ DB อัปเดตเสร็จก่อนค่อยโหลดรายการใหม่
-            setTimeout(() => {
-                loadJobOrders();
-            }, 1000); 
-            
-        } else {
-            alert('❌ เกิดข้อผิดพลาดในการสร้างใบสั่งงาน');
-        }
-}        
+
+
+        setTimeout(() => { loadJobOrders(); }, 1000);
+
+    } else {
+
+        alert('เกิดข้อผิดพลาดในการสร้างใบสั่งงาน: ' + (data.message || ''));
+
+    }
+
+}
     // ---------- JOB ORDERS LIST ----------
     async function loadJobOrders() {
       const res = await apiFetch('/api/job-orders');
