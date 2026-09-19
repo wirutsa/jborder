@@ -819,30 +819,7 @@ function updateSummaryTable() {
     if (gR) gR.innerText = fmt2(grandRemainAmount);
 }
     
-    // นำไปใส่ในตารางสรุปอัตโนมัติ
 
-  
-
-        // ดึงค่าจากช่องงบเริ่มต้น (กัน null ด้วย optional chaining)
-    let startBudget = 0;
-    if (type === 'งานเบา')  startBudget = Number(document.getElementById('budget-start-light')?.value  || 0);
-    if (type === 'งานกลาง') startBudget = Number(document.getElementById('budget-start-medium')?.value || 0);
-    if (type === 'งานหนัก') startBudget = Number(document.getElementById('budget-start-heavy')?.value  || 0);
-
-    // ✅ เช็กก่อนว่าเจอช่องไหม แล้วค่อยใส่ค่า
-    if (cell) {
-        if (cell.tagName === 'INPUT' || cell.tagName === 'TEXTAREA') {
-            cell.value = startBudget;
-        } else {
-            cell.innerText = startBudget.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-    } else {
-        console.warn(`⚠️ แถว "${type}" ไม่มี element class="sum-budget-start"`);
-    }
-
-    // ... คำนวณยอดคงเหลือต่อ ...
-    {;
-    }
 
     // === ระบบลายเซ็น (รองรับทั้งเมาส์และนิ้วบนมือถือ) ===
     (function initSignature() {
