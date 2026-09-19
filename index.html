@@ -691,19 +691,19 @@
     // ---------- CREATE JOB ORDER ----------
     async function createJobOrder() {
          // แทนที่ลูป .work-item ด้วยการดึงข้อมูลจากช่อง Input โดยตรง
-        // ดึงค่า Rai, Ngan, Wah จากช่องกรอกเดิมที่คุณมี
-    const r = parseFloat(document.getElementById('jo_rai')?.value || 0);
-    const n = parseFloat(document.getElementById('jo_ngan')?.value || 0);
-    const w = parseFloat(document.getElementById('jo_wah')?.value || 0);
+           // ดึงค่าโดยหาจาก Class แทน ID
+    const r = parseFloat(document.querySelector('.area-rai')?.value || 0);
+    const n = parseFloat(document.querySelector('.area-ngan')?.value || 0);
+    const w = parseFloat(document.querySelector('.area-wah')?.value || 0);
     
-    // คำนวณเป็น ตร.ม. ใหม่ตรงนี้เลย (1 ไร่ = 1600 ตร.ม., 1 งาน = 400 ตร.ม., 1 วา = 4 ตร.ม.)
+    // คำนวณเป็น ตร.ม.
     const totalSqm = (r * 1600) + (n * 400) + (w * 4);
 
     const items = [{
         work_type: "งานหลัก",
         prev_cumulative: "0",
-        total_sqm: totalSqm.toString(), // ใช้ค่าที่คำนวณสดๆ
-        unit_price: "0"
+        total_sqm: totalSqm.toString(), 
+        unit_price: "0" 
     }];
 
       const body = {
