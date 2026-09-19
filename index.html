@@ -698,62 +698,37 @@ let globalItems = [];
     }
 
     // ---------- CREATE JOB ORDER ----------
-    async function createJobOrder() {
+   async function createJobOrder() {
     const items = globalItems;
 
-    
-
-    // กันไว้ก่อน ถ้ายังไม่มีข้อมูลในตาราง ก็ให้แจ้งเตือน
-
     if (!items || items.length === 0) {
-
-        alert("ยังไม่ได้คำนวณรายการงาน! กรุณาตรวจสอบข้อมูลในตารางก่อน");
-
+        alert("ยังไม่มีรายการงาน!");
         return;
-
     }
 
-
+    // --- ย้าย body มาไว้ตรงนี้ ---
     const body = {
-
-        contract_id: document.getElementById('jo_contract').value,
-
-        // ... (โค้ดส่วนอื่นคงเดิม) ...
-
-        items: items // ส่งค่า items ที่ดึงมาจาก globalItems
-
+        contract_id: document.getElementById('jo_contract')?.value,
+        items: items 
+        // เพิ่ม field อื่นๆ ที่คุณต้องส่งด้วยนะครับ
     };
 
-    
+    // --- ย้ายส่วนส่ง fetch มาไว้ตรงนี้ (ในฟังก์ชัน) ---
+    const res = await apiFetch('/api/job-orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
 
-    // ... (โค้ดส่วนการ fetch ส่งไป server คงเดิม) ...
+    const data = await res.json();
+    if (res.ok) {
+        alert("สร้างใบสั่งงานสำเร็จ!");
+        // เพิ่มโค้ดโหลดรายการใหม่ตรงนี้
+    } else {
+        alert('เกิดข้อผิดพลาดในการสร้างใบสั่งงาน');
+    }
+} // <--- จบฟังก์ชันที่นี่ปีกกาปิดตรงนี้
 
-}
-
-
-      const body = {
-        contract_id: document.getElementById('jo_contract').value,
-        job_order_no: document.getElementById('jo_no').value,
-        issued_date: document.getElementById('jo_issued').value,
-        delivery_date: document.getElementById('jo_delivery').value,
-        survey_date: document.getElementById('jo_survey').value,
-        start_date: document.getElementById('jo_start').value,
-        duration_days: document.getElementById('jo_duration').value,
-        prepared_by: document.getElementById('jo_prepared').value,
-        department: document.getElementById('jo_dept').value,
-        work_detail: document.getElementById('jo_detail').value,
-        workers: document.getElementById('jo_workers').value,
-        equipment: document.getElementById('jo_equipment').value,
-        area_restriction: document.getElementById('jo_restrict').value,
-        safety_condition: document.getElementById('jo_safety').value,
-        waste_management: document.getElementById('jo_waste').value,
-        total_area: document.getElementById('totalAreaDisplay')?.innerText || '0',
-        items
-      };
-
-      const res = await apiFetch('/api/job-orders', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
-      });
       const data = await res.json();
               if (res.ok) {
             const fullLink = window.location.origin + data.contractor_link;
