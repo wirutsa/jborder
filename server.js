@@ -117,7 +117,11 @@ app.post('/api/job-orders', auth, async (req, res) => {
         const contract = await pool.query('SELECT * FROM contracts WHERE id = $1', [toNum(b.contract_id)]);
         const link = `${req.protocol}://${req.get('host')}/contractor.html?token=${token}`;
         const lineId = contract.rows[0]?.contractor_line_id;
-        if (lineId) sendLineMessage(lineId, `📄 มีใบสั่งงานใหม่: ${b.job_order_no}\n${link}`);
+       if (lineId && lineId.trim() !== "") {
+    sendLineMessage(lineId, `📄 มีใบสั่งงานใหม่: ${b.job_order_no}\n${link}`);
+} else {
+    console.log("⚠️ ข้ามการส่ง LINE: ไม่พบ LINE ID ของผู้รับ");
+}
 
         const email = contract.rows[0]?.contractor_email;
         if (email) sendEmailNotification(email, `ใบสั่งงานใหม่ ${b.job_order_no}`, newJobOrderTemplate(b.job_order_no, b.work_detail, link));
