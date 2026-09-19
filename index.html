@@ -695,12 +695,36 @@ let globalItems = [];
     // ---------- CREATE JOB ORDER ----------
     async function createJobOrder() {
            // --- ใช้ข้อมูลที่คำนวณและเก็บไว้ใน globalItems แล้ว ---
-    const items = typeof globalItems !== 'undefined' ? globalItems : [];
+      const items = globalItems; 
+
     
-    if (items.length === 0) {
-        alert("ยังไม่มีรายการงาน หรือคำนวณพื้นที่ไม่สำเร็จ!");
+
+    // กันไว้ก่อน ถ้ายังไม่มีข้อมูลในตาราง ก็ให้แจ้งเตือน
+
+    if (!items || items.length === 0) {
+
+        alert("ยังไม่ได้คำนวณรายการงาน! กรุณาตรวจสอบข้อมูลในตารางก่อน");
+
         return;
+
     }
+
+
+    const body = {
+
+        contract_id: document.getElementById('jo_contract').value,
+
+        // ... (โค้ดส่วนอื่นคงเดิม) ...
+
+        items: items // ส่งค่า items ที่ดึงมาจาก globalItems
+
+    };
+
+    
+
+    // ... (โค้ดส่วนการ fetch ส่งไป server คงเดิม) ...
+
+}
 
 
       const body = {
@@ -775,7 +799,6 @@ function updateSummaryTable() {
     // 1) รวมปริมาณ ตร.ม. ของใบสั่งงานครั้งนี้ แยกตามประเภทงาน
    const currentQty = { 'งานเบา': 0, 'งานกลาง': 0, 'งานหนัก': 0 };
    globalItems = []; 
-
 document.querySelectorAll('.work-item').forEach(row => {
 
     // ดึงค่าจากสิ่งที่คำนวณไว้แล้วในหน้าเว็บ
