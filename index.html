@@ -693,14 +693,21 @@
       const items = [];
       document.querySelectorAll('.work-item').forEach(row => {
         items.push({
-          work_type: row.querySelector('.work-type').value,
-          rai: row.querySelector('.area-rai').value,
-          ngan: row.querySelector('.area-ngan').value,
-          wah: row.querySelector('.area-wah').value,
-          total_wah: row.querySelector('.area-total').value,
-          total_sqm: row.querySelector('.area-sqm').value,
-          unit_price: row.querySelector('.unit-price').value,
-          amount: row.querySelector('.row-amount').value
+          work_type: row.querySelector('.work-type').value || row.querySelector('.work-type').innerText,
+
+    rai: row.querySelector('.area-rai').value || row.querySelector('.area-rai').innerText,
+
+    ngan: row.querySelector('.area-ngan').value || row.querySelector('.area-ngan').innerText,
+
+    wah: row.querySelector('.area-wah').value || row.querySelector('.area-wah').innerText,
+
+    total_wah: row.querySelector('.area-total').value || row.querySelector('.area-total').innerText,
+
+    total_sqm: row.querySelector('.area-sqm').value || row.querySelector('.area-sqm').innerText, // แก้ตรงนี้
+
+    unit_price: row.querySelector('.unit-price').value || row.querySelector('.unit-price').innerText, // และตรงนี้
+
+    amount: row.querySelector('.row-amount').value || row.querySelector('.row-amount').innerText
         });
       });
 
