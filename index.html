@@ -690,26 +690,14 @@
 
     // ---------- CREATE JOB ORDER ----------
     async function createJobOrder() {
-      const items = [];
-      document.querySelectorAll('.work-item').forEach(row => {
-        items.push({
-          work_type: row.querySelector('.work-type').value || row.querySelector('.work-type').innerText,
-
-    rai: row.querySelector('.area-rai').value || row.querySelector('.area-rai').innerText,
-
-    ngan: row.querySelector('.area-ngan').value || row.querySelector('.area-ngan').innerText,
-
-    wah: row.querySelector('.area-wah').value || row.querySelector('.area-wah').innerText,
-
-    total_wah: row.querySelector('.area-total').value || row.querySelector('.area-total').innerText,
-
-    total_sqm: row.querySelector('.area-sqm').value || row.querySelector('.area-sqm').innerText, // แก้ตรงนี้
-
-    unit_price: row.querySelector('.unit-price').value || row.querySelector('.unit-price').innerText, // และตรงนี้
-
-    amount: row.querySelector('.row-amount').value || row.querySelector('.row-amount').innerText
-        });
-      });
+         // แทนที่ลูป .work-item ด้วยการดึงข้อมูลจากช่อง Input โดยตรง
+    const items = [{
+        work_type: "งานหลัก", // หรือชื่อประเภทงานที่คุณต้องการ
+        prev_cumulative: "0", 
+        // เปลี่ยน 'id_ของช่องที่แสดงพื้นที่' เป็น ID จริงใน HTML ของคุณ (เช่น 'area-sqm')
+        total_sqm: document.getElementById('totalAreaDisplay')?.innerText || "0", 
+        unit_price: "0" // หากมีช่องใส่ราคาต่อหน่วยให้แก้เป็น document.getElementById('...').value
+    }];
 
       const body = {
         contract_id: document.getElementById('jo_contract').value,
