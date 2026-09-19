@@ -493,7 +493,12 @@
 
 // ประกาศไว้นอกฟังก์ชัน เพื่อให้ทุกฟังก์ชันใช้งานร่วมกันได้
 let globalItems = []; 
-
+function showTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.style.display = 'none';
+    });
+    document.getElementById(tabName).style.display = 'block';
+}
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/login.html';
     document.getElementById('userName').innerText = '👤 ' + (localStorage.getItem('name') || '');
@@ -694,8 +699,7 @@ let globalItems = [];
 
     // ---------- CREATE JOB ORDER ----------
     async function createJobOrder() {
-           // --- ใช้ข้อมูลที่คำนวณและเก็บไว้ใน globalItems แล้ว ---
-      const items = globalItems; 
+    const items = globalItems;
 
     
 
