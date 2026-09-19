@@ -79,13 +79,12 @@ app.get('/api/contracts', auth, async (req, res) => {
 });
 
 // ---------- JOB ORDERS ----------
-// บันทึกใบสั่งงาน
 app.post('/api/job-orders', auth, async (req, res) => {
     try {
         const b = req.body;
         const token = uuidv4();
-        
-        // 1. บันทึกข้อมูลหลัก (ครอบ toNum ทุกช่องที่เป็นตัวเลข)
+
+        // 1. บันทึกข้อมูลหลัก
         const result = await pool.query(`
             INSERT INTO job_orders (
                 job_order_no, contract_id, issued_date, delivery_date, survey_date, start_date, 
@@ -112,31 +111,22 @@ app.post('/api/job-orders', auth, async (req, res) => {
                 );
             }
         }
-        
-        // ... (ส่วนที่เหลือคือดึง contract และส่ง line) ...
+
+        // 3. ส่ง Notification
         const contract = await pool.query('SELECT * FROM contracts WHERE id = $1', [toNum(b.contract_id)]);
-        // ...
-  }
+        const link = `${req.protocol}://${req.get('host')}/contractor.html?token=${token}`;
+        const lineId = contract.rows[0]?.contractor_line_id;
+        if (lineId) sendLineMessage(lineId, `📄 มีใบสั่งงานใหม่: ${b.job_order_no}\n${link}`);
 
-  const contract = await pool.query('SELECT * FROM contracts WHERE id = $1', [b.contract_id]);
-  const link = `${req.protocol}://${req.get('host')}/contractor.html?token=${token}`;
+        const email = contract.rows[0]?.contractor_email;
+        if (email) sendEmailNotification(email, `ใบสั่งงานใหม่ ${b.job_order_no}`, newJobOrderTemplate(b.job_order_no, b.work_detail, link));
 
-  const lineId = contract.rows[0]?.contractor_line_id;
-  if (lineId) sendLineMessage(lineId, `📋 มีใบสั่งงานใหม่: ${b.job_order_no}\n${link}`);
+        res.json({ success: true, id: joId, contractor_link: `/contractor.html?token=${token}` });
 
-  const email = contract.rows[0]?.contractor_email;
-  if (email) sendEmailNotification(email, `ใบสั่งงานใหม่ ${b.job_order_no}`, newJobOrderTemplate(b.job_order_no, b.work_detail, link));
-
-  res.json({ id: joId, contractor_link: `/contractor.html?token=${token}` });
-});
-function toNum(v) {
-    const n = parseFloat(v);
-    return isNaN(n) ? null : n; // ถ้าแปลงไม่ได้ ให้ส่งเป็น null หรือ 0
-}
-
-app.get('/api/job-orders', auth, async (req, res) => {
-  const result = await pool.query('SELECT * FROM job_orders ORDER BY id DESC');
-  res.json(result.rows);
+    } catch (err) {
+        console.error('❌ Error บันทึกใบงาน:', err);
+        res.status(500).json({ success: false, message: err.message });
+    }
 });
 // บันทึกใบสั่งงานใหม่
 app.post('/api/job-orders', async (req, res) => {
