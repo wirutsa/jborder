@@ -79,25 +79,43 @@ app.get('/api/contracts', auth, async (req, res) => {
 });
 
 // ---------- JOB ORDERS ----------
+// บันทึกใบสั่งงาน
 app.post('/api/job-orders', auth, async (req, res) => {
-  const b = req.body;
-  const token = uuidv4();
-  const result = await pool.query(`
-    INSERT INTO job_orders (job_order_no,contract_id,issued_date,delivery_date,survey_date,start_date,
-    duration_days,completion_date,prepared_by,department,issued_for,map_image,total_area,work_detail,
-    workers,equipment,area_restriction,safety_condition,waste_management,access_token,status)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,'issued') RETURNING id`,
-    [b.job_order_no,toNum(b.contract_id),b.issued_date,b.delivery_date,b.survey_date,b.start_date,b.duration_days,
-     b.completion_date,b.prepared_by,b.department,b.issued_for,b.map_image,toNum(b.total_area),b.work_detail,
-     b.workers,b.equipment,b.area_restriction,b.safety_condition,b.waste_management,token]
-  );
-  const joId = result.rows[0].id;
+    try {
+        const b = req.body;
+        const token = uuidv4();
+        
+        // 1. บันทึกข้อมูลหลัก (ครอบ toNum ทุกช่องที่เป็นตัวเลข)
+        const result = await pool.query(`
+            INSERT INTO job_orders (
+                job_order_no, contract_id, issued_date, delivery_date, survey_date, start_date, 
+                duration_days, completion_date, prepared_by, department, issued_for, map_image, 
+                total_area, work_detail, workers, equipment, area_restriction, safety_condition, 
+                waste_management, access_token, status
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, 'issued') 
+            RETURNING id`, 
+            [
+                b.job_order_no, toNum(b.contract_id), b.issued_date, b.delivery_date, b.survey_date, b.start_date, 
+                toNum(b.duration_days), b.completion_date, b.prepared_by, b.department, b.issued_for, b.map_image, 
+                toNum(b.total_area), b.work_detail, b.workers, b.equipment, b.area_restriction, b.safety_condition, 
+                b.waste_management, token
+            ]
+        );
+        const joId = result.rows[0].id;
 
-  for (const i of (b.items || [])) {
-    await pool.query(
-      'INSERT INTO job_order_items (job_order_id,work_type,prev_cumulative,area_this_order,unit_price) VALUES ($1,$2,$3,$4,$5)',
-      [joId, i.work_type, i.prev_cumulative, i.area_this_order, i.unit_price]
-    );
+        // 2. บันทึกรายการงานย่อย
+        if (Array.isArray(b.items)) {
+            for (const i of b.items) {
+                await pool.query(
+                    'INSERT INTO job_order_items (job_order_id, work_type, prev_cumulative, area_this_order, unit_price) VALUES ($1, $2, $3, $4, $5)',
+                    [joId, i.work_type, toNum(i.prev_cumulative), toNum(i.area_this_order), toNum(i.unit_price)]
+                );
+            }
+        }
+        
+        // ... (ส่วนที่เหลือคือดึง contract และส่ง line) ...
+        const contract = await pool.query('SELECT * FROM contracts WHERE id = $1', [toNum(b.contract_id)]);
+        // ...
   }
 
   const contract = await pool.query('SELECT * FROM contracts WHERE id = $1', [b.contract_id]);
