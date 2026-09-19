@@ -109,6 +109,10 @@ app.post('/api/job-orders', auth, async (req, res) => {
 
   res.json({ id: joId, contractor_link: `/contractor.html?token=${token}` });
 });
+function toNum(v) {
+    const n = parseFloat(v);
+    return isNaN(n) ? null : n; // ถ้าแปลงไม่ได้ ให้ส่งเป็น null หรือ 0
+}
 
 app.get('/api/job-orders', auth, async (req, res) => {
   const result = await pool.query('SELECT * FROM job_orders ORDER BY id DESC');
@@ -128,9 +132,9 @@ app.post('/api/job-orders', async (req, res) => {
                 equipment, area_restriction, safety_condition, waste_management
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) RETURNING id`, 
             [
-                b.job_order_no, b.contract_id, b.issued_date, b.delivery_date, b.survey_date, 
-                b.start_date, b.duration_days, b.completion_date, b.prepared_by, b.department, 
-                b.issued_for, b.map_image, b.total_area, b.work_detail, b.workers, 
+                b.job_order_no,toNum(b.contract_id), b.issued_date, b.delivery_date, b.survey_date, 
+                b.start_date, toNum(b.duration_days),  b.completion_date, b.prepared_by, b.department, 
+                b.issued_for, b.map_image, toNum(b.total_area),   b.work_detail, b.workers, 
                 b.equipment, b.area_restriction, b.safety_condition, b.waste_management
             ]
         );
