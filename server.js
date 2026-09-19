@@ -87,7 +87,7 @@ app.post('/api/job-orders', auth, async (req, res) => {
     duration_days,completion_date,prepared_by,department,issued_for,map_image,total_area,work_detail,
     workers,equipment,area_restriction,safety_condition,waste_management,access_token,status)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,'issued') RETURNING id`,
-    [b.job_order_no,toNum(b.contract_id)b.issued_date,b.delivery_date,b.survey_date,b.start_date,b.duration_days,
+    [b.job_order_no,toNum(b.contract_id),b.issued_date,b.delivery_date,b.survey_date,b.start_date,b.duration_days,
      b.completion_date,b.prepared_by,b.department,b.issued_for,b.map_image,toNum(b.total_area),b.work_detail,
      b.workers,b.equipment,b.area_restriction,b.safety_condition,b.waste_management,token]
   );
