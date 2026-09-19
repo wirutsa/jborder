@@ -691,12 +691,19 @@
     // ---------- CREATE JOB ORDER ----------
     async function createJobOrder() {
          // แทนที่ลูป .work-item ด้วยการดึงข้อมูลจากช่อง Input โดยตรง
+        // ดึงค่า Rai, Ngan, Wah จากช่องกรอกเดิมที่คุณมี
+    const r = parseFloat(document.getElementById('jo_rai')?.value || 0);
+    const n = parseFloat(document.getElementById('jo_ngan')?.value || 0);
+    const w = parseFloat(document.getElementById('jo_wah')?.value || 0);
+    
+    // คำนวณเป็น ตร.ม. ใหม่ตรงนี้เลย (1 ไร่ = 1600 ตร.ม., 1 งาน = 400 ตร.ม., 1 วา = 4 ตร.ม.)
+    const totalSqm = (r * 1600) + (n * 400) + (w * 4);
+
     const items = [{
-        work_type: "งานหลัก", // หรือชื่อประเภทงานที่คุณต้องการ
-        prev_cumulative: "0", 
-        // เปลี่ยน 'id_ของช่องที่แสดงพื้นที่' เป็น ID จริงใน HTML ของคุณ (เช่น 'area-sqm')
-        total_sqm: document.getElementById('totalAreaDisplay')?.innerText || "0", 
-        unit_price: "0" // หากมีช่องใส่ราคาต่อหน่วยให้แก้เป็น document.getElementById('...').value
+        work_type: "งานหลัก",
+        prev_cumulative: "0",
+        total_sqm: totalSqm.toString(), // ใช้ค่าที่คำนวณสดๆ
+        unit_price: "0"
     }];
 
       const body = {
@@ -917,8 +924,6 @@ function removeItemRow(el) {
 function calcItemArea(el) {
   return calcArea(el);
 }
-
   </script>
 </body>
-
 </html>
