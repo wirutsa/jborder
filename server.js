@@ -173,6 +173,17 @@ app.post('/api/job-orders', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+// เพิ่ม Route นี้เข้าไปเพื่อให้หน้าเว็บโหลดรายการทั้งหมดได้
+app.get('/api/job-orders', auth, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM job_orders ORDER BY id DESC');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.get('/api/job-orders/:id', async (req, res) => {
   const order = (await pool.query('SELECT * FROM job_orders WHERE id = $1', [req.params.id])).rows[0];
   if (!order) return res.status(404).json({ error: 'ไม่พบใบสั่งงาน' });
