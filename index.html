@@ -728,17 +728,22 @@
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
       });
       const data = await res.json();
-      if (res.ok) {
-        const fullLink = window.location.origin + data.contractor_link;
-        document.getElementById('joResultLink').innerHTML = `
-      <div class="link-box">
-        ✅ สร้างใบสั่งงานสำเร็จ! ลิงก์สำหรับผู้รับจ้าง:<br>
-        <a href="${fullLink}" target="_blank">${fullLink}</a>
-      </div>`;
-      } else {
-        alert('❌ เกิดข้อผิดพลาดในการสร้างใบสั่งงาน');
-      }
-    }
+              if (res.ok) {
+            const fullLink = window.location.origin + data.contractor_link;
+            document.getElementById('joResultLink').innerHTML = `
+            <div class="link-box">
+            ✅ สร้างใบสั่งงานสำเร็จ! ลิงก์สำหรับผู้รับจ้าง:<br>
+            <a href="${fullLink}" target="_blank">${fullLink}</a>
+            </div>`;
+            
+            // ✅ เพิ่ม Delay 1 วินาที เพื่อให้ DB อัปเดตเสร็จก่อนค่อยโหลดรายการใหม่
+            setTimeout(() => {
+                loadJobOrders();
+            }, 1000); 
+            
+        } else {
+            alert('❌ เกิดข้อผิดพลาดในการสร้างใบสั่งงาน');
+        }
 
     // ---------- JOB ORDERS LIST ----------
     async function loadJobOrders() {
