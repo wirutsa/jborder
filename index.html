@@ -777,12 +777,35 @@ function fmt2(n) {
 function updateSummaryTable() {
     // 1) รวมปริมาณ ตร.ม. ของใบสั่งงานครั้งนี้ แยกตามประเภทงาน
     const currentQty = { 'งานเบา': 0, 'งานกลาง': 0, 'งานหนัก': 0 };
-    document.querySelectorAll('.work-item').forEach(row => {
-        const type = row.querySelector('.work-type')?.value;
-        const sqm  = parseFloat(row.querySelector('.area-sqm')?.value) || 0;
-        if (currentQty.hasOwnProperty(type)) currentQty[type] += sqm;
-    });
-    // ⚠️ ห้ามมี } ตรงนี้ — ฟังก์ชันต้องทำงานต่อ
+   const items = [];
+}
+document.querySelectorAll('.work-item').forEach(row => {
+
+    // ดึงค่าจากสิ่งที่คำนวณไว้แล้วในหน้าเว็บ
+
+    const type = row.querySelector('.work-type')?.value;
+
+    const sqm = parseFloat(row.querySelector('.area-sqm')?.value || 0);
+
+    const price = parseFloat(row.querySelector('.unit-price')?.value || 0);
+
+
+    if (type && sqm > 0) {
+
+        items.push({
+
+            work_type: type,
+
+            prev_cumulative: "0",
+
+            total_sqm: sqm.toString(),
+
+            unit_price: price.toString()
+
+        });
+
+    }
+
 
     let grandAmount = 0, grandRemainAmount = 0;
 
