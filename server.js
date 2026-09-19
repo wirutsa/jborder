@@ -105,11 +105,18 @@ app.post('/api/job-orders', auth, async (req, res) => {
         // 2. บันทึกรายการงานย่อย
         if (Array.isArray(b.items)) {
             for (const i of b.items) {
-                await pool.query(
-                    'INSERT INTO job_order_items (job_order_id, work_type, prev_cumulative, area_this_order, unit_price) VALUES ($1, $2, $3, $4, $5)',
-                    // ตรงนี้ครับ! เปลี่ยน i.area_this_order เป็น i.total_sqm
+                console.log("DEBUG: ข้อมูลที่ได้รับจากหน้าเว็บ -> work_type:", i.work_type, "total_sqm:", i.total_sqm);
+
+        
+
+                 await pool.query(
+
+                   'INSERT INTO job_order_items (job_order_id, work_type, prev_cumulative, area_this_order, unit_price) VALUES ($1, $2, $3, $4, $5)',
+
                     [joId, i.work_type, toNum(i.prev_cumulative), toNum(i.total_sqm), toNum(i.unit_price)]
+
                 );
+
             }
         }
 
