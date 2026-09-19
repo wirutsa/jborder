@@ -727,7 +727,7 @@ let globalItems = [];
     } else {
         alert('เกิดข้อผิดพลาดในการสร้างใบสั่งงาน');
     }
-} // <--- จบฟังก์ชันที่นี่ปีกกาปิดตรงนี้
+ // <--- จบฟังก์ชันที่นี่ปีกกาปิดตรงนี้
 
       const data = await res.json();
               if (res.ok) {
@@ -746,6 +746,7 @@ let globalItems = [];
         } else {
             alert('❌ เกิดข้อผิดพลาดในการสร้างใบสั่งงาน');
         }
+}        
     // ---------- JOB ORDERS LIST ----------
     async function loadJobOrders() {
       const res = await apiFetch('/api/job-orders');
