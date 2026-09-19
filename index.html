@@ -490,6 +490,10 @@
   </div>
 
   <script>
+
+// ประกาศไว้นอกฟังก์ชัน เพื่อให้ทุกฟังก์ชันใช้งานร่วมกันได้
+let globalItems = []; 
+
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/login.html';
     document.getElementById('userName').innerText = '👤 ' + (localStorage.getItem('name') || '');
@@ -690,21 +694,14 @@
 
     // ---------- CREATE JOB ORDER ----------
     async function createJobOrder() {
-         // แทนที่ลูป .work-item ด้วยการดึงข้อมูลจากช่อง Input โดยตรง
-           // ดึงค่าโดยหาจาก Class แทน ID
-    const r = parseFloat(document.querySelector('.area-rai')?.value || 0);
-    const n = parseFloat(document.querySelector('.area-ngan')?.value || 0);
-    const w = parseFloat(document.querySelector('.area-wah')?.value || 0);
+           // --- ใช้ข้อมูลที่คำนวณและเก็บไว้ใน globalItems แล้ว ---
+    const items = typeof globalItems !== 'undefined' ? globalItems : [];
     
-    // คำนวณเป็น ตร.ม.
-    const totalSqm = (r * 1600) + (n * 400) + (w * 4);
+    if (items.length === 0) {
+        alert("ยังไม่มีรายการงาน หรือคำนวณพื้นที่ไม่สำเร็จ!");
+        return;
+    }
 
-    const items = [{
-        work_type: "งานหลัก",
-        prev_cumulative: "0",
-        total_sqm: totalSqm.toString(), 
-        unit_price: "0" 
-    }];
 
       const body = {
         contract_id: document.getElementById('jo_contract').value,
@@ -777,7 +774,7 @@ function fmt2(n) {
 function updateSummaryTable() {
     // 1) รวมปริมาณ ตร.ม. ของใบสั่งงานครั้งนี้ แยกตามประเภทงาน
    const currentQty = { 'งานเบา': 0, 'งานกลาง': 0, 'งานหนัก': 0 };
-   const items = [];
+   globalItems = []; 
 
 document.querySelectorAll('.work-item').forEach(row => {
 
@@ -792,7 +789,7 @@ document.querySelectorAll('.work-item').forEach(row => {
 
     if (type && sqm > 0) {
 
-        items.push({
+        globalItems.push({ 
 
             work_type: type,
 
