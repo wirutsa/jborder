@@ -776,9 +776,9 @@ function fmt2(n) {
 
 function updateSummaryTable() {
     // 1) รวมปริมาณ ตร.ม. ของใบสั่งงานครั้งนี้ แยกตามประเภทงาน
-    const currentQty = { 'งานเบา': 0, 'งานกลาง': 0, 'งานหนัก': 0 };
+   const currentQty = { 'งานเบา': 0, 'งานกลาง': 0, 'งานหนัก': 0 };
    const items = [];
-}
+
 document.querySelectorAll('.work-item').forEach(row => {
 
     // ดึงค่าจากสิ่งที่คำนวณไว้แล้วในหน้าเว็บ
@@ -805,6 +805,8 @@ document.querySelectorAll('.work-item').forEach(row => {
         });
 
     }
+
+});
 
 
     let grandAmount = 0, grandRemainAmount = 0;
