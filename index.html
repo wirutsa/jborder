@@ -856,6 +856,9 @@ async function createJobOrder() {
     async function loadJobOrders() {
       const res = await apiFetch('/api/job-orders');
       const data = await res.json();
+      console.log('📋 ข้อมูลใบสั่งงาน:', list);        // ⭐ เพิ่มบรรทัดนี้
+      console.log('🔍 ตัวอย่างแถวแรก:', list[0]);     // ⭐ และบรรทัดนี้
+
       document.getElementById('jobOrderTable').innerHTML = data.map(jo => `
     <tr>
       <td>${jo.job_order_no}</td>
