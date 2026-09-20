@@ -502,6 +502,13 @@ let globalItems = [];
     if (!token) window.location.href = '/login.html';
     document.getElementById('userName').innerText = '👤 ' + (localStorage.getItem('name') || '');
 
+
+    function toNum(v) {
+    if (v === null || v === undefined) return 0;
+    const n = parseFloat(String(v).replace(/,/g, '').trim());
+    return isNaN(n) ? 0 : n;
+}
+
     function normalizeArea(rai, ngan, wah) {
 
       const totalWah = (rai * 400) + (ngan * 100) + wah;
@@ -543,9 +550,8 @@ let globalItems = [];
       row.querySelector('.area-sqm').value = sqm;
 
       // คำนวณเป็นเงิน (ตร.ม. x ราคาต่อหน่วย)
-      const price = parseFloat(row.querySelector('.unit-price').value) || 0;
-      row.querySelector('.row-amount').value = (sqm * price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-      updateGrandTotal();
+      const price = toNum(row.querySelector('.unit-price').value);     // ⭐ รองรับ comma
+      row.querySelector('.row-amount').value = (sqm * price).toFixed(2);   // ⭐ ไม่มี comma
     }
 
     function updateGrandTotal() {
@@ -553,9 +559,10 @@ let globalItems = [];
       let grandTotalPrice = 0;
 
       document.querySelectorAll('.work-item').forEach(row => {
-        grandTotalWah += parseFloat(row.querySelector('.area-total').value) || 0;
-        grandTotalPrice += parseFloat(row.querySelector('.row-amount').value) || 0;
+    grandTotalWah   += toNum(row.querySelector('.area-total').value);   // ⭐
+    grandTotalPrice += toNum(row.querySelector('.row-amount').value);   // ⭐
       });
+
 
       const grandTotalSqm = grandTotalWah * 4;
 
@@ -580,9 +587,11 @@ let globalItems = [];
 
     // === สิ้นสุดโค้ดที่วาง ===
     function logout() {
-      localStorage.clear();
-      window.location.href = '/login.html';
-    }
+    localStorage.removeItem('token');
+    localStorage.removeItem('name');
+    window.location.href = '/login.html';
+}
+
 
     function showTab(name) {
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -593,17 +602,28 @@ let globalItems = [];
       if (name === 'createjo') loadContractsForSelect();
     }
 
- async function apiFetch(url, options = {}) {
-    const headers = { ...(options.headers || {}) };
-    headers['Authorization'] = 'Bearer ' + token;
+async function apiFetch(url, options = {}) {
+    const token = localStorage.getItem('token');   // ⭐ อ่านจาก localStorage ทุกครั้ง
 
-    // ✅ ถ้ามี body และยังไม่ได้ระบุ Content-Type → ใส่ให้อัตโนมัติ
+    const headers = { ...(options.headers || {}) };
+
+    if (token) {
+        headers['Authorization'] = 'Bearer ' + token;
+    }
+
+    // ถ้ามี body และยังไม่ได้ระบุ Content-Type → ใส่ให้อัตโนมัติ
     if (options.body && !headers['Content-Type'] && !(options.body instanceof FormData)) {
         headers['Content-Type'] = 'application/json';
     }
 
     const res = await fetch(url, { ...options, headers });
-    if (res.status === 401) { logout(); return; }
+
+    if (res.status === 401 || res.status === 403) {
+        console.warn('🔒 Token ไม่ถูกต้องหรือหมดอายุ');
+        logout();
+        throw new Error('Unauthorized');   // ⭐ โยน error แทน return เปล่า
+    }
+
     return res;
 }
 
@@ -1033,6 +1053,29 @@ function removeItemRow(el) {
 function calcItemArea(el) {
   return calcArea(el);
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('token');
+
+    // ⭐ ยามเฝ้าประตู — ไม่มี token ห้ามเข้า
+    if (!token) {
+        window.location.href = '/login.html';
+        return;
+    }
+
+    // แสดงชื่อผู้ใช้ (แก้ id ให้ตรงกับของคุณ)
+    const name = localStorage.getItem('name') || 'ผู้ใช้งาน';
+    const nameEl = document.getElementById('userName');
+    if (nameEl) nameEl.textContent = name;
+
+    // โหลดข้อมูลตั้งต้น
+    loadContracts();
+    loadJobOrders();
+    showTab('contracts');
+
+    console.log('✅ เข้าสู่ระบบแล้ว:', name);
+});
+
   </script>
 </body>
 </html>
