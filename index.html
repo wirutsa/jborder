@@ -252,7 +252,11 @@
     <div id="tab-createjo" class="panel">
       <h3>สร้างใบสั่งงานใหม่</h3>
       <label>เลือกสัญญา</label>
-      <select id="jo_contract"></select>
+      <select id="jo_contract">
+
+        <option value="">-- กรุณาเลือกสัญญา --</option>
+
+      </select>
 
       <div class="row">
         <div><label>เลขที่ใบสั่งงาน</label><input id="jo_no" placeholder="เช่น JO-001/2569"></div>
@@ -620,6 +624,36 @@ let globalItems = [];
       else alert('❌ เกิดข้อผิดพลาด');
     }
 
+    // ─── โหลดรายการสัญญามาใส่ dropdown ของแท็บ 3 ───
+async function loadContractOptions() {
+    const sel = document.getElementById('jo_contract');
+    if (!sel) {
+        console.error('❌ ไม่พบ element id="jo_contract"');
+        return;
+    }
+
+    try {
+        const res  = await apiFetch('/api/contracts');
+        const list = await res.json();
+
+        // 🔍 บรรทัดนี้สำคัญมาก — ดูโครงสร้างข้อมูลจริงที่ API ส่งกลับมา
+        console.log('📦 ข้อมูลสัญญาที่ได้:', list);
+
+        sel.innerHTML = '<option value="">-- กรุณาเลือกสัญญา --</option>';
+
+        list.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value       = c.id;                              // ⭐ หัวใจ: ต้องใส่ value
+            opt.textContent = `${c.contract_no} — ${c.contractor_name}`;
+            sel.appendChild(opt);
+        });
+
+        console.log(`✅ โหลดสัญญาสำเร็จ ${list.length} รายการ`);
+    } catch (err) {
+        console.error('❌ โหลดรายการสัญญาไม่สำเร็จ:', err);
+    }
+}
+
     async function loadContracts() {
       const res = await apiFetch('/api/contracts');
       const data = await res.json();
@@ -696,33 +730,42 @@ let globalItems = [];
    // 1. เพิ่ม showTab ที่หายไป
 
 function showTab(tabName) {
-    // 1) ซ่อนทุก panel (แก้จาก .tab-content เป็น .panel ให้ตรงกับ HTML)
     document.querySelectorAll('.panel').forEach(p => {
         p.classList.remove('active');
         p.style.display = 'none';
     });
 
-    // 2) หา panel เป้าหมาย — รองรับทั้งแบบมี tab- และไม่มี
     const target = document.getElementById('tab-' + tabName)
                 || document.getElementById(tabName);
-
     if (!target) {
-        const ids = [...document.querySelectorAll('.panel')].map(p => p.id).join(', ');
-        console.error(`❌ หาแท็บ "${tabName}" ไม่เจอ | id ที่มีจริง: ${ids}`);
+        console.error(`❌ หาแท็บ "${tabName}" ไม่เจอ`);
         return;
     }
-
-    // 3) แสดง panel ที่เลือก
     target.classList.add('active');
     target.style.display = 'block';
 
-    // 4) ไฮไลต์ปุ่มที่ถูกกด
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     if (window.event && window.event.currentTarget) {
         window.event.currentTarget.classList.add('active');
     }
+
+    // ⭐ เพิ่มส่วนนี้ — เติม dropdown ทุกครั้งที่เข้าแท็บ 3
+    if (tabName === 'createjo') {
+        loadContractOptions();
+    }
 }
 
+document.getElementById('jo_contract').addEventListener('change', function() {
+    const contractId = this.value;
+    if (!contractId) return;
+
+    console.log('📌 เลือกสัญญา id =', contractId);
+
+    // ถ้ามีฟังก์ชันคำนวณตาราง ให้เรียกตรงนี้
+    if (typeof updateSummaryTable === 'function') {
+        updateSummaryTable();
+    }
+});
 
 // 2. ฟังก์ชันที่ถูกต้อง (รวมโค้ดให้สะอาด ไม่มี data ซ้ำ)
 
