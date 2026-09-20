@@ -491,12 +491,7 @@
 
   <script>
 
-function showTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.style.display = 'none';
-    });
-    document.getElementById(tabName).style.display = 'block';
-}
+
 let globalItems = []; 
 
     const token = localStorage.getItem('token');
@@ -701,15 +696,31 @@ let globalItems = [];
    // 1. เพิ่ม showTab ที่หายไป
 
 function showTab(tabName) {
-
-    document.querySelectorAll('.tab-content').forEach(tab => {
-
-        tab.style.display = 'none';
-
+    // 1) ซ่อนทุก panel (แก้จาก .tab-content เป็น .panel ให้ตรงกับ HTML)
+    document.querySelectorAll('.panel').forEach(p => {
+        p.classList.remove('active');
+        p.style.display = 'none';
     });
 
-    document.getElementById(tabName).style.display = 'block';
+    // 2) หา panel เป้าหมาย — รองรับทั้งแบบมี tab- และไม่มี
+    const target = document.getElementById('tab-' + tabName)
+                || document.getElementById(tabName);
 
+    if (!target) {
+        const ids = [...document.querySelectorAll('.panel')].map(p => p.id).join(', ');
+        console.error(`❌ หาแท็บ "${tabName}" ไม่เจอ | id ที่มีจริง: ${ids}`);
+        return;
+    }
+
+    // 3) แสดง panel ที่เลือก
+    target.classList.add('active');
+    target.style.display = 'block';
+
+    // 4) ไฮไลต์ปุ่มที่ถูกกด
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    if (window.event && window.event.currentTarget) {
+        window.event.currentTarget.classList.add('active');
+    }
 }
 
 
