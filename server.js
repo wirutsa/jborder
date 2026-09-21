@@ -189,7 +189,7 @@ app.post('/api/job-orders', auth, async (req, res) => {
         }
 
         // ─── 4. ตอบกลับ (ครั้งเดียวเท่านั้น!) ───
-        return res.json({
+               return res.json({
             success: true,
             id: joId,
             ...jo,
@@ -201,55 +201,12 @@ app.post('/api/job-orders', auth, async (req, res) => {
         console.error('❌ สร้างใบสั่งงานล้มเหลว:', err);
         return res.status(500).json({ message: err.message });
     } finally {
-        client.release();                                // ⭐ คืน connection เสมอ
+        client.release();                                // 🟢 คืน connection
     }
-});
+});                                                      // 🟢 ปิด route ตัวสุดท้ายตรงนี้พอ!
 
-    } catch (err) {
-        console.error('❌ Error บันทึกใบงาน:', err);
-        res.status(500).json({ success: false, message: err.message });
-    }
-});
-// บันทึกใบสั่งงานใหม่
-app.post('/api/job-orders', async (req, res) => {
-    try {
-        const b = req.body;
-        
-        // 1. บันทึกข้อมูลหลัก
-        const jobResult = await pool.query(`
-            INSERT INTO job_orders (
-                job_order_no, contract_id, issued_date, delivery_date, survey_date, 
-                start_date, duration_days, completion_date, prepared_by, department, 
-                issued_for, map_image, total_area, work_detail, workers, 
-                equipment, area_restriction, safety_condition, waste_management
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) RETURNING id`, 
-            [
-                b.job_order_no,toNum(b.contract_id), b.issued_date, b.delivery_date, b.survey_date, 
-                b.start_date, toNum(b.duration_days),  b.completion_date, b.prepared_by, b.department, 
-                b.issued_for, b.map_image, toNum(b.total_area),   b.work_detail, b.workers, 
-                b.equipment, b.area_restriction, b.safety_condition, b.waste_management
-            ]
-        );
+// (ใต้บรรทัดนี้ควรเป็น app.listen หรือไม่มีอะไรแล้ว ห้ามมี app.post ซ้ำอีก)
 
-        const joId = jobResult.rows[0].id;
-
-        // 2. บันทึกรายการงานย่อย (items)
-        if (b.items && Array.isArray(b.items)) {
-            for (const item of b.items) {
-                await pool.query(`
-                    INSERT INTO job_order_items (job_order_id, work_type, prev_cumulative, area_this_order, unit_price) 
-                    VALUES ($1, $2, $3, $4, $5)`,
-                    [joId, item.work_type, item.prev_cumulative, item.area_this_order, item.unit_price]
-                );
-            }
-        }
-
-        res.json({ success: true, id: joId });
-    } catch (err) {
-        console.error('Error:', err);
-        res.status(500).json({ error: err.message });
-    }
-});
 
 // เพิ่ม Route นี้เข้าไปเพื่อให้หน้าเว็บโหลดรายการทั้งหมดได้
 app.get('/api/job-orders', auth, async (req, res) => {
