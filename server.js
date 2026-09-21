@@ -73,36 +73,66 @@ app.post('/api/login', async (req, res) => {
 
 // ---------- AUTH ----------
 app.post('/api/job-orders', auth, async (req, res) => {
-    const b = req.body;
+    const b = req.body || {};
 
     if (!b.contract_id) return res.status(400).json({ message: 'กรุณาเลือกสัญญา' });
     if (!b.jo_no)       return res.status(400).json({ message: 'กรุณากรอกเลขที่ใบสั่งงาน' });
 
-    console.log('📥 รับข้อมูล:', b);          // ⭐ ดูใน Railway Logs ว่าครบไหม
-
     const token = require('crypto').randomBytes(16).toString('hex');
+    const client = await pool.connect();
 
-    const q = await pool.query(
-        `INSERT INTO job_orders
-           (contract_id, jo_no, jo_issued, jo_detail, total_sqm, total_price, token, status)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,'pending')
-         RETURNING *`,
-        [b.contract_id, b.jo_no, b.jo_issued || null, b.jo_detail || null,
-         b.total_sqm || 0, b.total_price || 0, token]
-    );
+    try {
+        await client.query('BEGIN');
 
-    const jo = q.rows[0];
-
-    // บันทึกรายการงาน
-    for (const it of (b.items || [])) {
-        await pool.query(
-            `INSERT INTO job_order_items (job_order_id, work_type, sqm, unit_price, amount)
-             VALUES ($1,$2,$3,$4,$5)`,
-            [jo.id, it.work_type, it.sqm, it.unit_price, it.amount]
+        // บันทึกหัวใบสั่งงาน (ใช้โครงสร้างพื้นฐานที่ปลอดภัยที่สุด)
+        const q = await client.query(
+            `INSERT INTO job_orders (contract_id, jo_no, jo_issued, jo_detail, total_sqm, total_price, token, status)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending') RETURNING *`,
+            [
+                Number(b.contract_id),
+                b.jo_no,
+                b.jo_issued || null,
+                b.jo_detail || null,
+                Number(b.total_sqm || 0),
+                Number(b.total_price || 0),
+                token
+            ]
         );
-    }
 
-    res.json({ ...jo, contractor_link: `/contractor.html?token=${token}` });
+        const joId = q.rows[0].id;
+
+        // บันทึกรายการย่อย (ถ้ามี)
+        if (Array.isArray(b.items)) {
+            for (const it of b.items) {
+                await client.query(
+                    `INSERT INTO job_order_items (job_order_id, work_type, sqm, unit_price, amount)
+                     VALUES ($1, $2, $3, $4, $5)`,
+                    [
+                        joId,
+                        it.work_type || 'งานทั่วไป',
+                        Number(it.sqm || 0),
+                        Number(it.unit_price || 0),
+                        Number(it.amount || 0)
+                    ]
+                );
+            }
+        }
+
+        await client.query('COMMIT');
+
+        return res.json({
+            success: true,
+            id: joId,
+            contractor_link: `/contractor.html?token=${token}`
+        });
+
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error('❌ Server Error ใน /api/job-orders:', err.message);
+        return res.status(500).json({ message: 'Database Error: ' + err.message });
+    } finally {
+        client.release();
+    }
 });
 
 function auth(req, res, next) {

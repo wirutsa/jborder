@@ -879,59 +879,32 @@ async function loadJobOrders() {
                || document.querySelector('#joborders-table tbody')
                || document.querySelector('#tab-joborders table tbody');
 
-    if (!tbody) {
-        console.error('❌ ไม่พบ tbody ของตารางใบสั่งงาน — ต้องแก้ selector');
-        return;
-    }
+    if (!tbody) return;
 
     try {
         const res  = await apiFetch('/api/job-orders');
-        const rows = await res.json();                    // ⭐ ชื่อตัวแปร rows
+        const rows = await res.json();                    // ⭐ ใช้ชื่อ rows ป้องกัน list is not defined
 
-        console.log('📋 ข้อมูลใบสั่งงาน:', rows);
-        console.log('🔍 แถวแรก:', rows[0]);
-
-        if (!Array.isArray(rows) || rows.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:#888">
-                                 — ยังไม่มีใบสั่งงาน —</td></tr>`;
-            return;
-        }
+        if (!Array.isArray(rows)) return;
 
         tbody.innerHTML = rows.map(jo => {
-            // ⭐ รองรับชื่อฟิลด์ได้หลายแบบ ไม่ต้องเดา
-            const no     = jo.jo_no     ?? jo.job_no  ?? jo.order_no ?? '-';
-            const issued = jo.jo_issued ?? jo.issued_date ?? jo.created_at ?? null;
+            const no     = jo.jo_no     ?? jo.job_no  ?? '-';
+            const issued = jo.jo_issued ?? jo.issued_date ?? null;
             const dateTxt = issued ? new Date(issued).toLocaleDateString('th-TH') : '-';
 
-            const isSigned = String(jo.status).toLowerCase() === 'signed'
-                          || jo.is_signed === true
-                          || !!jo.signed_at
-                          || !!jo.signature;
-
-            const badge = isSigned
-                ? '<span style="background:#d4edda;color:#155724;padding:4px 10px;border-radius:12px">✅ ลงนามแล้ว</span>'
-                : '<span style="background:#fff3cd;color:#856404;padding:4px 10px;border-radius:12px">⏳ รอลงนาม</span>';
-
-            const link = jo.contractor_link
-                      ?? (jo.token ? '/contractor.html?token=' + jo.token : '#');
+            const isSigned = String(jo.status).toLowerCase() === 'signed' || jo.is_signed === true;
+            const badge = isSigned ? '✅ ลงนามแล้ว' : '⏳ รอลงนาม';
+            const link  = jo.contractor_link ?? ('/contractor.html?token=' + jo.token);
 
             return `<tr>
                 <td>${no}</td>
                 <td>${dateTxt}</td>
                 <td>${badge}</td>
-                <td>
-                    <a href="${link}" target="_blank">🔗 เปิดลิงก์</a>
-                    <button onclick="deleteJobOrder(${jo.id})" style="margin-left:8px">🗑</button>
-                </td>
+                <td><a href="${link}" target="_blank">🔗 เปิดลิงก์</a></td>
             </tr>`;
         }).join('');
-
-        console.log(`✅ แสดงใบสั่งงาน ${rows.length} รายการ`);
-
     } catch (err) {
         console.error('❌ โหลดใบสั่งงานไม่สำเร็จ:', err);
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:red">
-                             เกิดข้อผิดพลาด: ${err.message}</td></tr>`;
     }
 }
     // ---------- JOB ORDERS LIST ----------
