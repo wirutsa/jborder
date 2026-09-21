@@ -44,6 +44,38 @@ app.use('/uploads', express.static('uploads'));
 
 initSchema().then(() => console.log('✅ Database schema พร้อมใช้งาน')).catch(err => console.error('❌ DB Error:', err.message));
 
+
+/* ═════════ LOGIN ROUTE ═════════ */
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+
+    // ⚠️ (ถ้าคุณใช้เช็กกับฐานข้อมูล ให้เปลี่ยนตรงนี้ตามโค้ดเดิมของคุณ)
+    // อันนี้เป็นตัวอย่างแบบเช็กค่ารหัสผ่านเบื้องต้นครับ
+    if (username === 'admin' && password === 'password123') {
+        const token = jwt.sign({ username: 'admin' }, process.env.JWT_SECRET || 'your_secret_key', { expiresIn: '7d' });
+        return res.json({ success: true, token, name: 'ผู้ดูแลระบบ' });
+    }
+
+    // หรือถ้าใช้เช็กจากตาราง users ใน DB:
+    /*
+    try {
+        const result = await pool.query('SELECT * FROM users WHERE username = $1 AND password = $2', [username, password]);
+        if (result.rows.length > 0) {
+            const user = result.rows[0];
+            const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET || 'secret', { expiresIn: '7d' });
+            return res.json({ success: true, token, name: user.name || user.username });
+        }
+    } catch (err) {
+        console.error(err);
+    }
+    */
+
+    return res.status(401).json({ success: false, message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
+});
+
+
+
+
 // ---------- AUTH ----------
 app.post('/api/job-orders', auth, async (req, res) => {
     const b = req.body;
