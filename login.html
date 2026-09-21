@@ -28,14 +28,18 @@ async function login() {
     method: 'POST', headers: {'Content-Type':'application/json'},
     body: JSON.stringify({ username, password })
   });
-  const data = await res.json();
-  if (res.ok) {
+  // ตัวอย่างโค้ดฝั่ง frontend ตอนรับผลลัพธ์จาก api/login
+const data = await res.json();
+
+if (res.ok && data.success) {
     localStorage.setItem('token', data.token);
     localStorage.setItem('name', data.name);
     window.location.href = '/index.html';
-  } else {
-    document.getElementById('err').innerText = data.error;
-  }
+} else {
+    // ⭐ ป้องกันคำว่า undefined ด้วยการใส่ข้อความสำรอง
+    const errorMsg = data.message || data.error || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+    document.getElementById('errorMsg').innerText = errorMsg; 
+}
 }
 </script>
 </body>
