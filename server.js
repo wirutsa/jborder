@@ -193,21 +193,18 @@ app.post('/api/job-orders', auth, async (req, res) => {
         const jo   = q.rows[0];
         const joId = jo.id;                              // ⭐ ใช้ชื่อเดียวกับโค้ดเก่า
 
-        // ─── 2. บันทึกรายการงานย่อย (ครั้งเดียว!) ───
+                // บันทึกรายการย่อย (ใช้ชื่อคอลัมน์เดิมของคุณ)
         if (Array.isArray(b.items)) {
             for (const it of b.items) {
-                console.log('DEBUG item →', it.work_type, '| sqm:', it.sqm);
-
                 await client.query(
-                    `INSERT INTO job_order_items
-                       (job_order_id, work_type, prev_cumulative, area_this_order, unit_price)
-                     VALUES ($1,$2,$3,$4,$5)`,
+                    `INSERT INTO job_order_items 
+                       (job_order_id, work_type, area_this_order, unit_price)
+                     VALUES ($1, $2, $3, $4)`,
                     [
                         joId,
-                        it.work_type,
-                        toNum(it.prev_cumulative),
-                        toNum(it.sqm ?? it.total_sqm ?? it.area_this_order),
-                        toNum(it.unit_price)
+                        it.work_type || 'งานทั่วไป',
+                        Number(it.sqm || it.total_sqm || 0),   // ดึงค่าจากหน้าเว็บมาลงช่องนี้
+                        Number(it.unit_price || 0)
                     ]
                 );
             }
