@@ -661,22 +661,78 @@ function logout() {
 }
 
     // ---------- CONTRACTS ----------
-    async function createContract() {
-      const body = {
-        contract_no: document.getElementById('c_no').value,
-        contractor_name: document.getElementById('c_name').value,
-        total_area: document.getElementById('c_area').value,
-        total_value: document.getElementById('c_value').value,
-        contractor_email: document.getElementById('c_email').value,
-        contractor_line_id: document.getElementById('c_line').value
-      };
-      const res = await apiFetch('/api/contracts', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
-      });
-      if (res.ok) { alert('✅ บันทึกสัญญาสำเร็จ'); loadContracts(); document.querySelectorAll('#tab-contracts input').forEach(i => i.value = ''); }
-      else alert('❌ เกิดข้อผิดพลาด');
+   async function createJobOrder() {
+    const contractId = document.getElementById('jo_contract')?.value;
+    if (!contractId) {
+        alert('⚠️ กรุณาเลือกสัญญาก่อนสร้างใบสั่งงาน');
+        return;
     }
 
+    const joNo = document.getElementById('jo_no')?.value?.trim();
+    if (!joNo) {
+        alert('⚠️ กรุณากรอกเลขที่ใบสั่งงาน');
+        return;
+    }
+
+    // รวบรวมรายการงานจากตาราง
+    const items = [...document.querySelectorAll('.work-item')].map(row => {
+        const q = sel => row.querySelector(sel);
+        return {
+            work_type : q('.work-type')?.value || q('.work-type')?.textContent || 'งานทั่วไป',
+            sqm       : toNum(q('.area-sqm')?.value || q('.sqm-input')?.value),
+            unit_price: toNum(q('.unit-price')?.value),
+            amount    : toNum(q('.row-amount')?.value)
+        };
+    }).filter(it => it.sqm > 0);
+
+    if (items.length === 0) {
+        alert('⚠️ ยังไม่มีรายการงาน หรือปริมาณงานเป็น 0');
+        return;
+    }
+
+    const totalSqm   = items.reduce((s, it) => s + it.sqm, 0);
+    const totalPrice = items.reduce((s, it) => s + it.amount, 0);
+
+    const body = {
+        contract_id : Number(contractId),
+        jo_no       : joNo,
+        jo_issued   : document.getElementById('jo_issued')?.value   || null,
+        jo_detail   : document.getElementById('jo_detail')?.value   || null,
+        total_sqm   : totalSqm,
+        total_price : totalPrice,
+        items       : items
+    };
+
+    console.log('📤 กำลังส่งข้อมูลสร้างใบสั่งงาน:', body);
+
+    try {
+        const res = await apiFetch('/api/job-orders', {
+            method: 'POST',
+            body: JSON.stringify(body)
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            const fullLink = window.location.origin + (data.contractor_link || '');
+            const resultBox = document.getElementById('joResultLink');
+            if (resultBox) {
+                resultBox.innerHTML = `
+                    <div style="background:#e8f5e9;padding:12px;border-radius:8px;margin-top:10px;">
+                    ✅ สร้างใบสั่งงานสำเร็จ! ลิงก์สำหรับผู้รับจ้าง:<br>
+                    <a href="${fullLink}" target="_blank">${fullLink}</a>
+                    </div>`;
+            } else {
+                alert('✅ สร้างใบสั่งงานสำเร็จ!');
+            }
+            setTimeout(loadJobOrders, 1000);
+        } else {
+            alert('❌ เกิดข้อผิดพลาด: ' + (data.message || 'ไม่สามารถสร้างได้'));
+        }
+    } catch (err) {
+        console.error('❌ API Error:', err);
+        alert('❌ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+    }
+}
     // ─── โหลดรายการสัญญามาใส่ dropdown ของแท็บ 3 ───
 async function loadContractOptions() {
     const sel = document.getElementById('jo_contract');
