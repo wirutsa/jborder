@@ -100,71 +100,110 @@ app.get('/api/contracts', auth, async (req, res) => {
   res.json(result.rows);
 });
 
-// ---------- JOB ORDERS ----------
+/* ═════════ CREATE JOB ORDER (ฉบับรวมร่าง) ═════════ */
 app.post('/api/job-orders', auth, async (req, res) => {
     const b = req.body;
 
+    // ─── ด่านตรวจ ───
     if (!b.contract_id) return res.status(400).json({ message: 'กรุณาเลือกสัญญา' });
     if (!b.jo_no)       return res.status(400).json({ message: 'กรุณากรอกเลขที่ใบสั่งงาน' });
 
-    console.log('📥 รับข้อมูล:', b);          // ⭐ ดูใน Railway Logs ว่าครบไหม
+    console.log('📥 รับข้อมูล:', JSON.stringify(b, null, 2));
 
     const token = require('crypto').randomBytes(16).toString('hex');
+    const client = await pool.connect();
 
-    const q = await pool.query(
-        `INSERT INTO job_orders
-           (contract_id, jo_no, jo_issued, jo_detail, total_sqm, total_price, token, status)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,'pending')
-         RETURNING *`,
-        [b.contract_id, b.jo_no, b.jo_issued || null, b.jo_detail || null,
-         b.total_sqm || 0, b.total_price || 0, token]
-    );
+    try {
+        await client.query('BEGIN');                    // ⭐ ทำเป็น transaction
 
-    const jo = q.rows[0];
-
-    // บันทึกรายการงาน
-    for (const it of (b.items || [])) {
-        await pool.query(
-            `INSERT INTO job_order_items (job_order_id, work_type, sqm, unit_price, amount)
-             VALUES ($1,$2,$3,$4,$5)`,
-            [jo.id, it.work_type, it.sqm, it.unit_price, it.amount]
+        // ─── 1. บันทึกหัวใบสั่งงาน ───
+        const q = await client.query(
+            `INSERT INTO job_orders
+               (contract_id, jo_no, jo_issued, jo_detail, total_sqm, total_price, token, status)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,'pending')
+             RETURNING *`,
+            [
+                toNum(b.contract_id),
+                b.jo_no,
+                b.jo_issued || null,
+                b.jo_detail || null,
+                toNum(b.total_sqm),
+                toNum(b.total_price),
+                token
+            ]
         );
-    }
 
-    res.json({ ...jo, contractor_link: `/contractor.html?token=${token}` });
-});
-        // 2. บันทึกรายการงานย่อย
+        const jo   = q.rows[0];
+        const joId = jo.id;                              // ⭐ ใช้ชื่อเดียวกับโค้ดเก่า
+
+        // ─── 2. บันทึกรายการงานย่อย (ครั้งเดียว!) ───
         if (Array.isArray(b.items)) {
-            for (const i of b.items) {
-                console.log("DEBUG: ข้อมูลที่ได้รับจากหน้าเว็บ -> work_type:", i.work_type, "total_sqm:", i.total_sqm);
+            for (const it of b.items) {
+                console.log('DEBUG item →', it.work_type, '| sqm:', it.sqm);
 
-        
-
-                 await pool.query(
-
-                   'INSERT INTO job_order_items (job_order_id, work_type, prev_cumulative, area_this_order, unit_price) VALUES ($1, $2, $3, $4, $5)',
-
-                    [joId, i.work_type, toNum(i.prev_cumulative), toNum(i.total_sqm), toNum(i.unit_price)]
-
+                await client.query(
+                    `INSERT INTO job_order_items
+                       (job_order_id, work_type, prev_cumulative, area_this_order, unit_price)
+                     VALUES ($1,$2,$3,$4,$5)`,
+                    [
+                        joId,
+                        it.work_type,
+                        toNum(it.prev_cumulative),
+                        toNum(it.sqm ?? it.total_sqm ?? it.area_this_order),
+                        toNum(it.unit_price)
+                    ]
                 );
-
             }
         }
 
-        // 3. ส่ง Notification
-        const contract = await pool.query('SELECT * FROM contracts WHERE id = $1', [toNum(b.contract_id)]);
+        await client.query('COMMIT');                    // ⭐ ยืนยันบันทึก
+
+        // ─── 3. แจ้งเตือน (ทำหลัง COMMIT / ห้ามให้พังทั้ง route) ───
         const link = `${req.protocol}://${req.get('host')}/contractor.html?token=${token}`;
-        const lineId = contract.rows[0]?.contractor_line_id;
-       if (lineId && lineId.trim() !== "") {
-    sendLineMessage(lineId, `📄 มีใบสั่งงานใหม่: ${b.job_order_no}\n${link}`);
-} else {
-    console.log("⚠️ ข้ามการส่ง LINE: ไม่พบ LINE ID ของผู้รับ");
-}
 
-        const email = contract.rows[0]?.contractor_email;
-        if (email) sendEmailNotification(email, `ใบสั่งงานใหม่ ${b.job_order_no}`, newJobOrderTemplate(b.job_order_no, b.work_detail, link));
+        try {
+            const contract = await pool.query(
+                'SELECT * FROM contracts WHERE id = $1',
+                [toNum(b.contract_id)]
+            );
 
-        res.json({ success: true, id: joId, contractor_link: `/contractor.html?token=${token}` });
+            if (contract.rows[0]) {
+                const lineId = contract.rows[0].contractor_line_id;
+                if (lineId && lineId.trim() !== '') {
+                    sendLineMessage(lineId, `📋 มีใบสั่งงานใหม่: ${b.jo_no}\n${link}`);
+                } else {
+                    console.log('⚠️ ข้ามการส่ง LINE: ไม่พบ LINE ID ของผู้รับจ้าง');
+                }
+
+                const email = contract.rows[0].contractor_email;
+                if (email) {
+                    sendEmailNotification(
+                        email,
+                        `ใบสั่งงานใหม่ ${b.jo_no}`,
+                        newJobOrderTemplate(b.jo_no, b.jo_detail, link)
+                    );
+                }
+            }
+        } catch (notifyErr) {
+            console.error('⚠️ แจ้งเตือนล้มเหลว (แต่บันทึกสำเร็จแล้ว):', notifyErr.message);
+        }
+
+        // ─── 4. ตอบกลับ (ครั้งเดียวเท่านั้น!) ───
+        return res.json({
+            success: true,
+            id: joId,
+            ...jo,
+            contractor_link: `/contractor.html?token=${token}`
+        });
+
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.error('❌ สร้างใบสั่งงานล้มเหลว:', err);
+        return res.status(500).json({ message: err.message });
+    } finally {
+        client.release();                                // ⭐ คืน connection เสมอ
+    }
+});
 
     } catch (err) {
         console.error('❌ Error บันทึกใบงาน:', err);
