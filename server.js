@@ -46,27 +46,40 @@ initSchema().then(() => console.log('✅ Database schema พร้อมใช�
 
 
 /* ═════════ LOGIN ROUTE ═════════ */
+/* ═════════ LOGIN ROUTE (ฉบับทดสอบเข้าได้ชัวร์) ═════════ */
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
 
-    // ⚠️ (ถ้าคุณใช้เช็กกับฐานข้อมูล ให้เปลี่ยนตรงนี้ตามโค้ดเดิมของคุณ)
-    // อันนี้เป็นตัวอย่างแบบเช็กค่ารหัสผ่านเบื้องต้นครับ
+    console.log('🔑 พยายามเข้าสู่ระบบด้วย:', username);
+
+    // 1. เช็กแบบล็อกอินแอดมินกลาง (แก้รหัสผ่านตรงนี้ได้เลยตามต้องการ)
     if (username === 'admin' && password === 'password123') {
-        const token = jwt.sign({ username: 'admin' }, process.env.JWT_SECRET || 'your_secret_key', { expiresIn: '7d' });
+        const token = jwt.sign(
+            { username: 'admin', role: 'admin' }, 
+            process.env.JWT_SECRET || 'your_secret_key', 
+            { expiresIn: '7d' }
+        );
         return res.json({ success: true, token, name: 'ผู้ดูแลระบบ' });
     }
 
-    // หรือถ้าใช้เช็กจากตาราง users ใน DB:
+    // 2. (ทางเลือก) ถ้าโปรเจกต์คุณเช็กจากฐานข้อมูล ให้เปิดคอมเมนต์ส่วนนี้
     /*
     try {
-        const result = await pool.query('SELECT * FROM users WHERE username = $1 AND password = $2', [username, password]);
+        const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
         if (result.rows.length > 0) {
             const user = result.rows[0];
-            const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET || 'secret', { expiresIn: '7d' });
-            return res.json({ success: true, token, name: user.name || user.username });
+            // ถ้ารหัสผ่านใน DB เป็น Plain text ให้เทียบตรงๆ (ถ้าเข้ารหัสด้วย bcrypt ให้ใช้ bcrypt.compare)
+            if (password === user.password) {
+                const token = jwt.sign(
+                    { id: user.id, username: user.username }, 
+                    process.env.JWT_SECRET || 'your_secret_key', 
+                    { expiresIn: '7d' }
+                );
+                return res.json({ success: true, token, name: user.name || user.username });
+            }
         }
     } catch (err) {
-        console.error(err);
+        console.error('Login DB Error:', err);
     }
     */
 
