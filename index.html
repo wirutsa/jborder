@@ -244,6 +244,7 @@
             <th>จัดการ</th>
           </tr>
         </thead>
+        <tbody id="joTableBody"></tbody>  
         <tbody id="jobOrderTable"></tbody>
       </table>
     </div>
@@ -498,6 +499,30 @@
 
 let globalItems = []; 
 
+/* ══════════ HELPER ══════════ */
+
+// แปลงค่าใดๆ เป็นตัวเลข รองรับ comma / ช่องว่าง / null
+function toNum(v) {
+    if (v === null || v === undefined) return 0;
+    const n = parseFloat(String(v).replace(/,/g, '').trim());
+    return isNaN(n) ? 0 : n;
+}
+
+// จัดรูปแบบตัวเลขสวยๆ สำหรับ "แสดงผล" เท่านั้น (ห้ามใช้กับ input[type=number])
+function fmt(n, digits = 2) {
+    return toNum(n).toLocaleString('en-US', {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+    });
+}
+
+// ดึงค่าจาก element อย่างปลอดภัย ไม่พังถ้าหา id ไม่เจอ
+function val(id) {
+    const el = document.getElementById(id);
+    return el ? (el.value ?? '').trim() : '';
+}
+
+
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/login.html';
     document.getElementById('userName').innerText = '👤 ' + (localStorage.getItem('name') || '');
@@ -550,31 +575,36 @@ let globalItems = [];
       row.querySelector('.area-sqm').value = sqm;
 
       // คำนวณเป็นเงิน (ตร.ม. x ราคาต่อหน่วย)
-      const price = toNum(row.querySelector('.unit-price').value);     // ⭐ รองรับ comma
-      row.querySelector('.row-amount').value = (sqm * price).toFixed(2);   // ⭐ ไม่มี comma
+      const price = toNum(row.querySelector('.unit-price').value);          // ⭐ toNum
+      row.querySelector('.row-amount').value = (sqm * price).toFixed(2);    // ⭐ ไม่มี comma!
+      updateGrandTotal();
     }
 
     function updateGrandTotal() {
-      let grandTotalWah = 0;
-      let grandTotalPrice = 0;
+    let grandTotalWah   = 0;
+    let grandTotalPrice = 0;
 
-      document.querySelectorAll('.work-item').forEach(row => {
-    grandTotalWah   += toNum(row.querySelector('.area-total').value);   // ⭐
-    grandTotalPrice += toNum(row.querySelector('.row-amount').value);   // ⭐
-      });
+    document.querySelectorAll('.work-item').forEach(row => {
+        grandTotalWah   += toNum(row.querySelector('.area-total')?.value);   // ⭐
+        grandTotalPrice += toNum(row.querySelector('.row-amount')?.value);   // ⭐
+    });
 
+    const grandTotalSqm = grandTotalWah * 4;
 
-      const grandTotalSqm = grandTotalWah * 4;
+    document.getElementById('grand-total-area').innerText  = fmt(grandTotalWah, 2);
+    document.getElementById('grand-total-sqm').innerText   = fmt(grandTotalSqm, 2);
+    document.getElementById('grand-total-price').innerText = fmt(grandTotalPrice, 2);
 
-      document.getElementById('grand-total-area').innerText = grandTotalWah.toLocaleString();
-      document.getElementById('grand-total-sqm').innerText = grandTotalSqm.toLocaleString();
-      document.getElementById('grand-total-price').innerText = grandTotalPrice.toLocaleString(undefined, { minimumFractionDigits: 2 });
-
-      const result = normalizeArea(0, 0, grandTotalWah);
-      document.getElementById('grand-total-rngw').innerText =
+    const result = normalizeArea(0, 0, grandTotalWah);
+    document.getElementById('grand-total-rngw').innerText =
         `${result.rai} ไร่ ${result.ngan} งาน ${result.wah} ตารางวา`;
-      updateSummaryTable();
-    }
+
+    // ⭐ เก็บค่าไว้ใช้ตอนสร้างใบสั่งงาน
+    window.__totalSqm   = grandTotalSqm;
+    window.__totalPrice = grandTotalPrice;
+
+    updateSummaryTable();
+}
 
 
     function removeRow(btn) {
@@ -602,16 +632,14 @@ let globalItems = [];
       if (name === 'createjo') loadContractsForSelect();
     }
 
+/* ══════════ AUTH & API ══════════ */
+
 async function apiFetch(url, options = {}) {
-    const token = localStorage.getItem('token');   // ⭐ อ่านจาก localStorage ทุกครั้ง
+    const token = localStorage.getItem('token');        // ⭐ อ่านใหม่ทุกครั้ง
 
     const headers = { ...(options.headers || {}) };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
 
-    if (token) {
-        headers['Authorization'] = 'Bearer ' + token;
-    }
-
-    // ถ้ามี body และยังไม่ได้ระบุ Content-Type → ใส่ให้อัตโนมัติ
     if (options.body && !headers['Content-Type'] && !(options.body instanceof FormData)) {
         headers['Content-Type'] = 'application/json';
     }
@@ -619,12 +647,17 @@ async function apiFetch(url, options = {}) {
     const res = await fetch(url, { ...options, headers });
 
     if (res.status === 401 || res.status === 403) {
-        console.warn('🔒 Token ไม่ถูกต้องหรือหมดอายุ');
+        console.warn('🔒 Token หมดอายุ');
         logout();
-        throw new Error('Unauthorized');   // ⭐ โยน error แทน return เปล่า
+        throw new Error('Unauthorized');                // ⭐ throw ไม่ใช่ return เปล่า
     }
-
     return res;
+}
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('name');
+    window.location.href = '/login.html';
 }
 
     // ---------- CONTRACTS ----------
@@ -749,108 +782,101 @@ async function loadContractOptions() {
     // ---------- CREATE JOB ORDER ----------
    // 1. เพิ่ม showTab ที่หายไป
 
-function showTab(tabName) {
+/* ══════════ TAB ══════════ */
+
+function showTab(tabName, evt) {
+    // 1) ซ่อนทุก panel
     document.querySelectorAll('.panel').forEach(p => {
         p.classList.remove('active');
         p.style.display = 'none';
     });
 
+    // 2) เปิด panel เป้าหมาย
     const target = document.getElementById('tab-' + tabName)
                 || document.getElementById(tabName);
     if (!target) {
-        console.error(`❌ หาแท็บ "${tabName}" ไม่เจอ`);
+        console.error(`❌ ไม่พบแท็บ "${tabName}"`);
         return;
     }
     target.classList.add('active');
     target.style.display = 'block';
 
+    // 3) ⭐ ไฮไลต์ปุ่ม — มีด่านกัน undefined ครบ
+    const btn = (evt && evt.currentTarget)
+             || (window.event && window.event.currentTarget)
+             || document.querySelector(`.tab-btn[onclick*="${tabName}"]`);
+
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    if (window.event && window.event.currentTarget) {
-        window.event.currentTarget.classList.add('active');
-    }
+    if (btn && btn.classList) btn.classList.add('active');   // ⭐ กันพังตรงนี้
 
-    // ⭐ เพิ่มส่วนนี้ — เติม dropdown ทุกครั้งที่เข้าแท็บ 3
-    if (tabName === 'createjo') {
-        loadContractOptions();
-    }
+    // 4) โหลดข้อมูลตามแท็บ
+    if (tabName === 'contracts') loadContracts();
+    if (tabName === 'joborders') loadJobOrders();
+    if (tabName === 'createjo')  loadContractOptions();
 }
-
-document.getElementById('jo_contract').addEventListener('change', function() {
-    const contractId = this.value;
-    if (!contractId) return;
-
-    console.log('📌 เลือกสัญญา id =', contractId);
-
-    // ถ้ามีฟังก์ชันคำนวณตาราง ให้เรียกตรงนี้
-    if (typeof updateSummaryTable === 'function') {
-        updateSummaryTable();
-    }
-});
-
 // 2. ฟังก์ชันที่ถูกต้อง (รวมโค้ดให้สะอาด ไม่มี data ซ้ำ)
 
-async function createJobOrder() {
+/* ══════════ JOB ORDERS ══════════ */
 
-    const items = typeof globalItems !== 'undefined' ? globalItems : [];
+async function loadJobOrders() {
+    const tbody = document.querySelector('#joTableBody')
+               || document.querySelector('#joborders-table tbody')
+               || document.querySelector('#tab-joborders table tbody');
 
-    
-
-    if (items.length === 0) {
-
-        alert("ยังไม่มีรายการงาน!");
-
+    if (!tbody) {
+        console.error('❌ ไม่พบ tbody ของตารางใบสั่งงาน — ต้องแก้ selector');
         return;
-
     }
 
+    try {
+        const res  = await apiFetch('/api/job-orders');
+        const rows = await res.json();                    // ⭐ ชื่อตัวแปร rows
 
-    const body = {
+        console.log('📋 ข้อมูลใบสั่งงาน:', rows);
+        console.log('🔍 แถวแรก:', rows[0]);
 
-        contract_id: document.getElementById('jo_contract')?.value,
+        if (!Array.isArray(rows) || rows.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:20px;color:#888">
+                                 — ยังไม่มีใบสั่งงาน —</td></tr>`;
+            return;
+        }
 
-        items: items
+        tbody.innerHTML = rows.map(jo => {
+            // ⭐ รองรับชื่อฟิลด์ได้หลายแบบ ไม่ต้องเดา
+            const no     = jo.jo_no     ?? jo.job_no  ?? jo.order_no ?? '-';
+            const issued = jo.jo_issued ?? jo.issued_date ?? jo.created_at ?? null;
+            const dateTxt = issued ? new Date(issued).toLocaleDateString('th-TH') : '-';
 
-    };
+            const isSigned = String(jo.status).toLowerCase() === 'signed'
+                          || jo.is_signed === true
+                          || !!jo.signed_at
+                          || !!jo.signature;
 
+            const badge = isSigned
+                ? '<span style="background:#d4edda;color:#155724;padding:4px 10px;border-radius:12px">✅ ลงนามแล้ว</span>'
+                : '<span style="background:#fff3cd;color:#856404;padding:4px 10px;border-radius:12px">⏳ รอลงนาม</span>';
 
-    const res = await apiFetch('/api/job-orders', {
+            const link = jo.contractor_link
+                      ?? (jo.token ? '/contractor.html?token=' + jo.token : '#');
 
-        method: 'POST',
+            return `<tr>
+                <td>${no}</td>
+                <td>${dateTxt}</td>
+                <td>${badge}</td>
+                <td>
+                    <a href="${link}" target="_blank">🔗 เปิดลิงก์</a>
+                    <button onclick="deleteJobOrder(${jo.id})" style="margin-left:8px">🗑</button>
+                </td>
+            </tr>`;
+        }).join('');
 
-        headers: { 'Content-Type': 'application/json' },
+        console.log(`✅ แสดงใบสั่งงาน ${rows.length} รายการ`);
 
-        body: JSON.stringify(body)
-
-    });
-
-
-    const data = await res.json(); // ประกาศ data ครั้งเดียวที่นี่
-
-    
-
-    if (res.ok) {
-
-        const fullLink = window.location.origin + data.contractor_link;
-
-        document.getElementById('joResultLink').innerHTML = `
-
-            <div class="link-box">
-
-            ✅ สร้างใบสั่งงานสำเร็จ! ลิงก์สำหรับผู้รับจ้าง:<br>
-
-            <a href="${fullLink}" target="_blank">${fullLink}</a>
-
-            </div>`;
-
-
-        setTimeout(() => { loadJobOrders(); }, 1000);
-
-    } else {
-
-        alert('เกิดข้อผิดพลาดในการสร้างใบสั่งงาน: ' + (data.message || ''));
-
+    } catch (err) {
+        console.error('❌ โหลดใบสั่งงานไม่สำเร็จ:', err);
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:red">
+                             เกิดข้อผิดพลาด: ${err.message}</td></tr>`;
     }
-
 }
     // ---------- JOB ORDERS LIST ----------
     async function loadJobOrders() {
@@ -1074,7 +1100,20 @@ window.addEventListener('DOMContentLoaded', () => {
     // โหลดข้อมูลตั้งต้น
     loadContracts();
     loadJobOrders();
-    showTab('contracts');
+   /* ══════════ START ══════════ */
+
+window.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/login.html'; return; }
+
+    const nameEl = document.getElementById('userName');
+    if (nameEl) nameEl.textContent = localStorage.getItem('name') || 'ผู้ใช้งาน';
+
+    showTab('contracts');          // ⭐ showTab จะเรียก loadContracts() ให้เอง
+    loadJobOrders();               // โหลดแท็บ 2 ไว้ล่วงหน้า
+
+    console.log('✅ พร้อมใช้งาน');
+});
 
     console.log('✅ เข้าสู่ระบบแล้ว:', name);
 });
